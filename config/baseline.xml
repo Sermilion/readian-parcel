@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>CompositionLocalAllowlist:Color.kt$LocalTestColors</ID>
+    <ID>CompositionLocalAllowlist:Activities.kt$LocalActivity</ID>
+    <ID>CompositionLocalAllowlist:BackgroundTheme.kt$LocalBackgroundTheme</ID>
+    <ID>CompositionLocalAllowlist:GradientColors.kt$LocalGradientColors</ID>
+    <ID>LongParameterList:Color.kt$ReadianColors$( backgroundVariant: Color, surfaceVariant: Color, outlineNormal: Color, outlineDisabled: Color, onSurfaceInverted: Color, separator: Color, positive: Color, warning: Color, scrim: Color, statusAttention: Color, isMediaTheme: Boolean, )</ID>
+  </CurrentIssues>
+</SmellBaseline>

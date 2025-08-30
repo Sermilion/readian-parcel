@@ -1,0 +1,85 @@
+# JIRA Ticket number
+jira.check(
+  key: ['MOB'],
+  url: 'https://<name>-team.atlassian.net/browse',
+  search_title: true,
+  search_commits: false,
+  fail_on_warning: false,
+  report_missing: true,
+  skippable: true,
+)
+
+# PR Title doesn't match criteria
+title_pattern = '^(build|chore|ci|docs|feat|feature|fix|perf|refactor|revert|style|test):\s\[MOB-(\d{1,4})\]\s(.*)$'
+title_contains_pattern = github.pr_title.match(title_pattern)
+if !title_contains_pattern
+  warn('PR title should follow conventional commits and include a JIRA-ID.')
+end
+
+# PR is a work in progress and shouldn't be merged yet
+warn 'This PR is a Work in Progress' if github.pr_title.include? '[WIP]'
+
+# Warn when there is a big PR
+warn "Big PR, consider splitting into smaller PR's" if git.lines_of_code > 500
+
+# Mainly to encourage writing up some reasoning about the PR, rather than
+# just leaving a title
+if github.pr_body.length < 5
+  fail 'Please provide a summary in the Pull Request description, consider using the Pull request template'
+end
+
+# has_app_changes =
+#   !git.modified_files.grep(/app/src/main/).empty? ||
+#     !git.added_files.grep(/app/src/main/).empty?
+# has_test_changes =
+#   !git.modified_files.grep(/app/src/test/).empty? ||
+#     !git.modified_files.grep(/app/src/sharedTest/).empty? ||
+#     !git.modified_files.grep(/app/src/androidTest/).empty? ||
+#     !git.modified_files.grep(/app/src/regressionTest/).empty? ||
+#     !git.added_files.grep(/app/src/test/).empty? ||
+#     !git.added_files.grep(/app/src/sharedTest/).empty?
+#     !git.added_files.grep(/app/src/androidTest/).empty?
+#     !git.added_files.grep(/app/src/regressionTest/).empty?
+
+# If changes are more than 10 lines of code, tests need to be updated too
+# if has_app_changes && !has_test_changes && git.lines_of_code > 10
+#   warn('Remember to add tests!', sticky: false)
+# end
+
+
+if git.deletions > git.insertions
+  message('Good job on cleaning the code. Cheers! 🍺')
+end
+
+
+gradleModule = "app"
+
+# Process Android-Lint results
+androidLintFile = String.new(gradleModule + "/build/reports/lint-results.xml")
+androidLintDebugFile = String.new(gradleModule + "/build/reports/lint-results-internalDebug.xml")
+if File.file?(androidLintFile) || File.file?(androidLintDebugFile)
+    android_lint.skip_gradle_task = true
+    android_lint.severity = "Warning"
+    if File.file?(androidLintFile)
+        android_lint.report_file = androidLintFile
+    else
+        android_lint.report_file = androidLintDebugFile
+    end
+    android_lint.filtering = true
+    android_lint.lint(inline_mode: true)
+else
+    fail "No Android Lint file found!"
+end
+
+# Process Detekt results
+detektFile = String.new(gradleModule + "/build/reports/detekt/detekt.xml")
+if File.file?(detektFile)
+    kotlin_detekt.report_file = detektFile
+    kotlin_detekt.skip_gradle_task = true
+    kotlin_detekt.severity = "warning"
+    kotlin_detekt.filtering = true
+    kotlin_detekt.detekt(inline_mode: true)
+#     kotlin_detekt.detekt(inline_mode: false)
+else
+    fail "No detekt file found!"
+end

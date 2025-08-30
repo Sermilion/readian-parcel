@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Parcel Tracker</string>
+    
+    <!-- Bottom navigation -->
+    <string name="packages">Packages</string>
+    <string name="profile">Profile</string>
+    
+    <!-- Login screen -->
+    <string name="api_key">API Key</string>
+    <string name="login">Login</string>
+    <string name="enter_api_key">Enter your Parcel API key</string>
+    
+    <!-- Packages screen -->
+    <string name="packages_title">My Packages</string>
+    <string name="refresh">Refresh</string>
+    <string name="filter">Filter</string>
+    
+    <!-- Profile screen -->
+    <string name="profile_title">Profile</string>
+    <string name="logout">Logout</string>
+    <string name="total_packages">Total Packages</string>
+    <string name="active_packages">Active Packages</string>
+    <string name="delivered_packages">Delivered Packages</string>
+</resources>
