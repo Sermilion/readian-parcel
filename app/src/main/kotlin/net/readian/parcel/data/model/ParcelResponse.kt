@@ -10,11 +10,11 @@ data class ParcelResponse(
     @SerialName("error_message")
     val errorMessage: String? = null,
     @SerialName("deliveries")
-    val deliveries: List<Delivery> = emptyList()
+    val deliveries: List<DeliveryResponse> = emptyList()
 )
 
 @Serializable
-data class Delivery(
+data class DeliveryResponse(
     @SerialName("carrier_code")
     val carrierCode: String,
     @SerialName("description")
@@ -24,34 +24,36 @@ data class Delivery(
     @SerialName("tracking_number")
     val trackingNumber: String,
     @SerialName("events")
-    val events: List<DeliveryEvent> = emptyList(),
+    val events: List<DeliveryEventResponse> = emptyList(),
     @SerialName("extra_information")
-    val extraInformation: Map<String, String> = emptyMap()
+    val extraInformation: String = ""
 )
 
 @Serializable
-data class DeliveryEvent(
-    @SerialName("timestamp")
-    val timestamp: Long,
-    @SerialName("description")
-    val description: String,
+data class DeliveryEventResponse(
+    @SerialName("event")
+    val event: String,
+    @SerialName("date")
+    val date: String,
     @SerialName("location")
-    val location: String? = null
+    val location: String? = null,
+    @SerialName("additional")
+    val additional: String? = null
 )
 
-enum class DeliveryStatus(val code: Int, val displayName: String) {
-    COMPLETED(0, "Completed"),
-    FROZEN(1, "Frozen"),
-    IN_TRANSIT(2, "In Transit"),
-    EXPECTING_PICKUP(3, "Expecting Pickup"),
-    OUT_FOR_DELIVERY(4, "Out for Delivery"),
-    NOT_FOUND(5, "Not Found"),
-    FAILED_DELIVERY(6, "Failed Delivery"),
-    EXCEPTION(7, "Exception"),
-    CARRIER_INFORMED(8, "Carrier Informed");
+enum class DeliveryStatusResponse(val code: Int) {
+    COMPLETED(0),
+    FROZEN(1),
+    IN_TRANSIT(2),
+    EXPECTING_PICKUP(3),
+    OUT_FOR_DELIVERY(4),
+    NOT_FOUND(5),
+    FAILED_DELIVERY(6),
+    EXCEPTION(7),
+    CARRIER_INFORMED(8);
 
-    companion object {
-        fun fromCode(code: Int): DeliveryStatus =
-            values().find { it.code == code } ?: EXCEPTION
+    companion object Companion {
+        fun fromCode(code: Int): DeliveryStatusResponse =
+            DeliveryStatusResponse.entries.find { it.code == code } ?: EXCEPTION
     }
 }

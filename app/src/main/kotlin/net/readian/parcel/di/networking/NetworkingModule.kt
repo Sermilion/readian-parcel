@@ -1,8 +1,11 @@
 package net.readian.parcel.di.networking
 
+import android.content.Context
+import com.chuckerteam.chucker.api.ChuckerInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import net.readian.parcel.di.qualifiers.ApiUrl
 import net.readian.parcel.di.qualifiers.Authenticated
@@ -23,7 +26,20 @@ object NetworkingModule {
     @Provides
     @Singleton
     @Unauthenticated
-    fun unauthenticatedOkHttpClient() = OkHttpClient.Builder().build()
+    fun unauthenticatedOkHttpClient(
+        @ApplicationContext context: Context
+    ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(ChuckerInterceptor.Builder(context).build())
+        .build()
+        
+    @Provides
+    @Singleton
+    @Authenticated
+    fun authenticatedOkHttpClient(
+        @ApplicationContext context: Context
+    ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(ChuckerInterceptor.Builder(context).build())
+        .build()
 
     @Provides
     @Singleton

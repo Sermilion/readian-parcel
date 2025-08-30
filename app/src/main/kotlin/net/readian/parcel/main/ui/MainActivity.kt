@@ -9,7 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import net.readian.parcel.core.ui.app.ParcelApp
-import net.readian.parcel.data.repository.ApiKeyRepository
+import net.readian.parcel.domain.repository.ApiKeyRepository
 import javax.inject.Inject
 import net.readian.parcel.main.MainActivityContract.UiState
 import net.readian.parcel.main.MainActivityViewModel

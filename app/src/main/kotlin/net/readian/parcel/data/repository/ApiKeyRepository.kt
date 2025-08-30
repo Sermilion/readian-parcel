@@ -4,13 +4,15 @@ import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import dagger.hilt.android.qualifiers.ApplicationContext
+import net.readian.parcel.domain.repository.ApiKeyRepository
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.content.edit
 
 @Singleton
-class ApiKeyRepository @Inject constructor(
+class ApiKeyRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
-) {
+) : ApiKeyRepository {
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
     
     private val encryptedPrefs = EncryptedSharedPreferences.create(
@@ -21,20 +23,20 @@ class ApiKeyRepository @Inject constructor(
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    fun saveApiKey(apiKey: String) {
-        encryptedPrefs.edit().putString(API_KEY_PREF, apiKey).apply()
+    override fun setApiKey(apiKey: String) {
+        encryptedPrefs.edit { putString(API_KEY_PREF, apiKey) }
     }
 
-    fun getApiKey(): String? {
+    override fun getApiKey(): String? {
         return encryptedPrefs.getString(API_KEY_PREF, null)
     }
 
-    fun hasApiKey(): Boolean {
+    override fun hasApiKey(): Boolean {
         return !getApiKey().isNullOrBlank()
     }
 
-    fun clearApiKey() {
-        encryptedPrefs.edit().remove(API_KEY_PREF).apply()
+    override fun clearApiKey() {
+        encryptedPrefs.edit { remove(API_KEY_PREF) }
     }
 
     companion object {

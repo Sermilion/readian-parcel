@@ -5,19 +5,19 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import net.readian.parcel.data.database.entity.PackageEntity
+import net.readian.parcel.data.database.entity.PackageDataModel
 
 @Dao
 interface PackageDao {
     
     @Query("SELECT * FROM packages ORDER BY lastUpdated DESC")
-    fun getAllPackages(): Flow<List<PackageEntity>>
+    fun getAllPackages(): Flow<List<PackageDataModel>>
     
     @Query("SELECT * FROM packages WHERE trackingNumber = :trackingNumber")
-    suspend fun getPackageByTrackingNumber(trackingNumber: String): PackageEntity?
+    suspend fun getPackageByTrackingNumber(trackingNumber: String): PackageDataModel?
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPackages(packages: List<PackageEntity>)
+    suspend fun insertPackages(packages: List<PackageDataModel>)
     
     @Query("DELETE FROM packages")
     suspend fun clearAllPackages()

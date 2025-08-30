@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import net.readian.parcel.data.api.ParcelApiService
-import net.readian.parcel.data.repository.ApiKeyRepository
+import net.readian.parcel.domain.repository.ApiKeyRepository
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,7 +45,7 @@ class LoginViewModel @Inject constructor(
                 val response = parcelApiService.getDeliveries(_uiState.value.apiKey)
                 
                 if (response.isSuccessful && response.body()?.success == true) {
-                    apiKeyRepository.saveApiKey(_uiState.value.apiKey)
+                    apiKeyRepository.setApiKey(_uiState.value.apiKey)
                     onSuccess()
                 } else {
                     val errorMessage = response.body()?.errorMessage 
@@ -61,6 +62,7 @@ class LoginViewModel @Inject constructor(
                     isError = true,
                     errorMessage = "Network error: ${e.message}"
                 )
+                Timber.e(e, "Error validating API key")
             }
         }
     }

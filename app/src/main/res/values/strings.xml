@@ -21,4 +21,15 @@
     <string name="total_packages">Total Packages</string>
     <string name="active_packages">Active Packages</string>
     <string name="delivered_packages">Delivered Packages</string>
+    
+    <!-- Delivery statuses -->
+    <string name="delivery_status_completed">Delivered</string>
+    <string name="delivery_status_frozen">Frozen</string>
+    <string name="delivery_status_in_transit">In Transit</string>
+    <string name="delivery_status_expecting_pickup">Awaiting Pickup</string>
+    <string name="delivery_status_out_for_delivery">Out for Delivery</string>
+    <string name="delivery_status_not_found">Not Found</string>
+    <string name="delivery_status_failed_delivery">Delivery Failed</string>
+    <string name="delivery_status_exception">Exception</string>
+    <string name="delivery_status_carrier_informed">Carrier Notified</string>
 </resources>

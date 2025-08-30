@@ -11,10 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import net.readian.parcel.data.model.Delivery
-import net.readian.parcel.data.model.DeliveryStatus
+import net.readian.parcel.feature.packages.model.DeliveryUiModel
+import net.readian.parcel.feature.packages.model.StatusColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,10 +63,10 @@ fun PackagesScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(uiState.packages) { delivery ->
+                        items(uiState.packages) { deliveryUi ->
                             PackageCard(
-                                delivery = delivery,
-                                onClick = { onPackageClick(delivery.trackingNumber) }
+                                deliveryUi = deliveryUi,
+                                onClick = { onPackageClick(deliveryUi.trackingNumber) }
                             )
                         }
                     }
@@ -91,7 +92,7 @@ fun PackagesScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PackageCard(
-    delivery: Delivery,
+    deliveryUi: DeliveryUiModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -110,34 +111,34 @@ private fun PackageCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = delivery.description,
+                        text = deliveryUi.description,
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = delivery.trackingNumber,
+                        text = deliveryUi.trackingNumber,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 
                 Surface(
-                    color = getStatusColor(delivery.statusCode),
+                    color = getStatusColor(deliveryUi.statusColor),
                     shape = MaterialTheme.shapes.small,
                     modifier = Modifier.padding(start = 8.dp)
                 ) {
                     Text(
-                        text = DeliveryStatus.fromCode(delivery.statusCode).displayName,
+                        text = deliveryUi.statusText,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
             }
 
-            if (delivery.carrierCode.isNotBlank()) {
+            if (deliveryUi.carrierCode.isNotBlank()) {
                 Text(
-                    text = "Carrier: ${delivery.carrierCode}",
+                    text = "Carrier: ${deliveryUi.carrierCode}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
@@ -148,13 +149,12 @@ private fun PackageCard(
 }
 
 @Composable
-private fun getStatusColor(statusCode: Int): Color {
-    return when (DeliveryStatus.fromCode(statusCode)) {
-        DeliveryStatus.COMPLETED -> MaterialTheme.colorScheme.primaryContainer
-        DeliveryStatus.OUT_FOR_DELIVERY -> MaterialTheme.colorScheme.tertiary
-        DeliveryStatus.IN_TRANSIT -> MaterialTheme.colorScheme.secondary
-        DeliveryStatus.EXPECTING_PICKUP -> MaterialTheme.colorScheme.outline
-        DeliveryStatus.FAILED_DELIVERY, DeliveryStatus.EXCEPTION -> MaterialTheme.colorScheme.errorContainer
-        else -> MaterialTheme.colorScheme.surfaceVariant
+private fun getStatusColor(statusColor: StatusColor): Color {
+    return when (statusColor) {
+        StatusColor.SUCCESS -> MaterialTheme.colorScheme.primaryContainer
+        StatusColor.INFO -> MaterialTheme.colorScheme.secondary
+        StatusColor.WARNING -> MaterialTheme.colorScheme.outline
+        StatusColor.ERROR -> MaterialTheme.colorScheme.errorContainer
+        StatusColor.NEUTRAL -> MaterialTheme.colorScheme.surfaceVariant
     }
 }

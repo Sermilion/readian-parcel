@@ -35,7 +35,7 @@ fun LoginScreen(
         Text(
             text = "Parcel Tracker",
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 32.dp),
         )
 
         OutlinedTextField(
@@ -55,7 +55,8 @@ fun LoginScreen(
             supportingText = uiState.errorMessage?.let { errorMessage ->
                 { Text(errorMessage) }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 1,
         )
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -34,3 +34,11 @@ Error while executing process .../bin/jlink with arguments {...}
 ```
 
 This occurs because jlink in JDK 21+ has breaking changes that are incompatible with Android Gradle Plugin 8.1.2.
+
+## Network Debugging
+
+The app includes Chucker for network debugging in debug builds:
+- Chucker will automatically show a notification when network requests are made
+- Tap the notification to view detailed request/response information
+- Chucker is only included in debug builds - it's automatically excluded from release builds
+- Useful for debugging API issues, JSON parsing problems, and network errors

@@ -13,7 +13,7 @@ plugins {
     alias(libs.plugins.readian.android.hilt)
     alias(libs.plugins.readian.android.room)
     id("jacoco")
-    alias(libs.plugins.readian.android.application.firebase)
+    // alias(libs.plugins.readian.android.application.firebase) // Disabled until Firebase is properly configured
 }
 
 val localProperties by lazy {
@@ -94,6 +94,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation("androidx.lifecycle:lifecycle-process:2.7.0")
     implementation(libs.androidx.compose.runtime.tracing)
     implementation(libs.androidx.compose.material3.windowSizeClass)
     implementation(libs.androidx.hilt.navigation.compose)
@@ -127,6 +128,10 @@ dependencies {
     
     // WorkManager for background sync
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+    
+    // Chucker for network debugging
+    debugImplementation("com.github.chuckerteam.chucker:library:4.0.0")
+    releaseImplementation("com.github.chuckerteam.chucker:library-no-op:4.0.0")
 
     // Core functions
     testImplementation(libs.androidx.navigation.testing)
