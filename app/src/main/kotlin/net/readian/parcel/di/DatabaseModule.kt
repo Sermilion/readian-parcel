@@ -19,18 +19,23 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideParcelDatabase(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): ParcelDatabase {
         return Room.databaseBuilder(
             context,
             ParcelDatabase::class.java,
-            ParcelDatabase.DATABASE_NAME
-        ).build()
+            ParcelDatabase.DATABASE_NAME,
+        ).fallbackToDestructiveMigration().build()
     }
 
     @Provides
     fun providePackageDao(database: ParcelDatabase): PackageDao {
         return database.packageDao()
+    }
+
+    @Provides
+    fun provideCarrierDao(database: ParcelDatabase): net.readian.parcel.data.database.dao.CarrierDao {
+        return database.carrierDao()
     }
 
     @Provides

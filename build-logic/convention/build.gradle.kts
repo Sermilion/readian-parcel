@@ -36,10 +36,6 @@ gradlePlugin {
             id = "readian.android.application"
             implementationClass = "AndroidApplicationConventionPlugin"
         }
-        register("androidApplicationJacoco") {
-            id = "readian.android.application.jacoco"
-            implementationClass = "AndroidApplicationJacocoConventionPlugin"
-        }
         register("androidLibraryCompose") {
             id = "readian.android.library.compose"
             implementationClass = "AndroidLibraryComposeConventionPlugin"
@@ -51,10 +47,6 @@ gradlePlugin {
         register("androidFeature") {
             id = "readian.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
-        }
-        register("androidLibraryJacoco") {
-            id = "readian.android.library.jacoco"
-            implementationClass = "AndroidLibraryJacocoConventionPlugin"
         }
         register("androidTest") {
             id = "readian.android.test"
@@ -79,10 +71,6 @@ gradlePlugin {
         register("androidLint") {
             id = "readian.android.lint"
             implementationClass = "AndroidLintConventionPlugin"
-        }
-        register("jvmLibrary") {
-            id = "readian.jvm.library"
-            implementationClass = "JvmLibraryConventionPlugin"
         }
     }
 }

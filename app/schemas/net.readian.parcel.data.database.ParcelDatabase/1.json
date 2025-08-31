@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0142726e8e2f92d69160d83b156e6996",
+    "identityHash": "802f7a2b9951538d95b6c1626eea7afd",
     "entities": [
       {
         "tableName": "packages",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`trackingNumber` TEXT NOT NULL, `carrierCode` TEXT NOT NULL, `description` TEXT NOT NULL, `statusCode` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `eventsJson` TEXT NOT NULL, `extraInformationJson` TEXT NOT NULL, PRIMARY KEY(`trackingNumber`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`trackingNumber` TEXT NOT NULL, `carrierCode` TEXT NOT NULL, `description` TEXT NOT NULL, `statusCode` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, `extraInformation` TEXT NOT NULL, `expectedAt` INTEGER, `expectedEndAt` INTEGER, `expectedDateRaw` TEXT, `expectedEndDateRaw` TEXT, PRIMARY KEY(`trackingNumber`), FOREIGN KEY(`carrierCode`) REFERENCES `carriers`(`code`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "trackingNumber",
@@ -39,16 +39,34 @@
             "notNull": true
           },
           {
-            "fieldPath": "eventsJson",
-            "columnName": "eventsJson",
+            "fieldPath": "extraInformation",
+            "columnName": "extraInformation",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "extraInformationJson",
-            "columnName": "extraInformationJson",
+            "fieldPath": "expectedAt",
+            "columnName": "expectedAt",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "expectedEndAt",
+            "columnName": "expectedEndAt",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "expectedDateRaw",
+            "columnName": "expectedDateRaw",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
+          },
+          {
+            "fieldPath": "expectedEndDateRaw",
+            "columnName": "expectedEndDateRaw",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -57,14 +75,174 @@
             "trackingNumber"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_packages_lastUpdated",
+            "unique": false,
+            "columnNames": [
+              "lastUpdated"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_packages_lastUpdated` ON `${TABLE_NAME}` (`lastUpdated`)"
+          },
+          {
+            "name": "index_packages_carrierCode",
+            "unique": false,
+            "columnNames": [
+              "carrierCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_packages_carrierCode` ON `${TABLE_NAME}` (`carrierCode`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "carriers",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "carrierCode"
+            ],
+            "referencedColumns": [
+              "code"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "package_events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `trackingNumber` TEXT NOT NULL, `description` TEXT NOT NULL, `rawDate` TEXT, `location` TEXT, `additional` TEXT, `timestamp` INTEGER, FOREIGN KEY(`trackingNumber`) REFERENCES `packages`(`trackingNumber`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trackingNumber",
+            "columnName": "trackingNumber",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawDate",
+            "columnName": "rawDate",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "location",
+            "columnName": "location",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "additional",
+            "columnName": "additional",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_package_events_trackingNumber",
+            "unique": false,
+            "columnNames": [
+              "trackingNumber"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_package_events_trackingNumber` ON `${TABLE_NAME}` (`trackingNumber`)"
+          },
+          {
+            "name": "index_package_events_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_package_events_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "packages",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "trackingNumber"
+            ],
+            "referencedColumns": [
+              "trackingNumber"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "carriers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`code` TEXT NOT NULL, `name` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`code`))",
+        "fields": [
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "code"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_carriers_name",
+            "unique": false,
+            "columnNames": [
+              "name"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_carriers_name` ON `${TABLE_NAME}` (`name`)"
+          }
+        ],
         "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0142726e8e2f92d69160d83b156e6996')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '802f7a2b9951538d95b6c1626eea7afd')"
     ]
   }
 }

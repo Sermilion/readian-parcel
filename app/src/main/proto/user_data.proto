@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+option java_package = "net.readian.parcel.data.proto";
+
+message UserData {
+  bool is_logged_in = 1;
+}

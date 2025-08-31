@@ -9,11 +9,32 @@
     <string name="api_key">API Key</string>
     <string name="login">Login</string>
     <string name="enter_api_key">Enter your Parcel API key</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
     
     <!-- Packages screen -->
     <string name="packages_title">My Packages</string>
     <string name="refresh">Refresh</string>
-    <string name="filter">Filter</string>
+    <string name="no_packages_found">No packages found</string>
+    <string name="carrier_label">Carrier: %1$s</string>
+    <string name="retry">Retry</string>
+    
+    <!-- Error messages -->
+    <string name="error_rate_limit_with_time">Please wait ~%1$d min before refreshing again</string>
+    <string name="error_rate_limit_general">Too many requests. Please wait before refreshing again</string>
+    <string name="error_api_key_not_found">API key not found</string>
+    <string name="error_api_key_empty">API key cannot be empty</string>
+    <string name="error_invalid_api_key">Invalid API key</string>
+    <string name="error_network_validation">Network error during validation</string>
+    <string name="events">Events</string>
+    <string name="copy">Copy</string>
+    <string name="share">Share</string>
+    <string name="share_tracking_title">Share tracking</string>
+    <string name="share_failed">Unable to share</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="delivered_label">Delivered: %1$s</string>
+    <string name="expected_label">Expected: %1$s</string>
+    <string name="expected_window_label">Expected: %1$s — %2$s</string>
     
     <!-- Profile screen -->
     <string name="profile_title">Profile</string>

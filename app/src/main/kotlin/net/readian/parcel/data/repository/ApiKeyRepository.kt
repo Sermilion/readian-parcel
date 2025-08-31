@@ -1,45 +1,55 @@
 package net.readian.parcel.data.repository
 
 import android.content.Context
+import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
-import net.readian.parcel.domain.repository.ApiKeyRepository
 import javax.inject.Inject
 import javax.inject.Singleton
-import androidx.core.content.edit
 
 @Singleton
-class ApiKeyRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
-) : ApiKeyRepository {
-    private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-    
+class ApiKeyRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
+    private val masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+
     private val encryptedPrefs = EncryptedSharedPreferences.create(
-        "parcel_api_prefs",
-        masterKeyAlias,
         context,
+        "parcel_api_prefs",
+        masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
     )
 
-    override fun setApiKey(apiKey: String) {
-        encryptedPrefs.edit { putString(API_KEY_PREF, apiKey) }
+    fun setApiKey(apiKey: String) {
+        val sanitized = apiKey
+            .replace("\r", "")
+            .replace("\n", "")
+            .trim()
+        encryptedPrefs.edit { putString(API_KEY_PREF, sanitized) }
     }
 
-    override fun getApiKey(): String? {
-        return encryptedPrefs.getString(API_KEY_PREF, null)
+    fun getApiKey(): String? {
+        val raw = encryptedPrefs.getString(API_KEY_PREF, null)
+        val sanitized = raw
+            ?.replace("\r", "")
+            ?.replace("\n", "")
+            ?.trim()
+        return sanitized?.takeIf { !it.isNullOrBlank() }
     }
 
-    override fun hasApiKey(): Boolean {
+    fun hasApiKey(): Boolean {
         return !getApiKey().isNullOrBlank()
     }
 
-    override fun clearApiKey() {
+    fun clearApiKey() {
         encryptedPrefs.edit { remove(API_KEY_PREF) }
     }
 
-    companion object {
+    companion object Companion {
         private const val API_KEY_PREF = "api_key"
     }
 }

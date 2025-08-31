@@ -20,6 +20,14 @@ workflows:
       - install-missing-android-tools@3:
           inputs:
             - gradlew_path: "$PROJECT_LOCATION/gradlew"
+      - script@1:
+          title: Run Detekt
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                cd "$PROJECT_LOCATION"
+                ./gradlew detekt --stacktrace
       - android-lint@0:
           inputs:
             - project_location: "$PROJECT_LOCATION"
@@ -58,6 +66,14 @@ workflows:
       - install-missing-android-tools@3:
           inputs:
             - gradlew_path: "$PROJECT_LOCATION/gradlew"
+      - script@1:
+          title: Run Detekt
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                cd "$PROJECT_LOCATION"
+                ./gradlew detekt --stacktrace
       - android-unit-test@1:
           inputs:
             - project_location: "$PROJECT_LOCATION"

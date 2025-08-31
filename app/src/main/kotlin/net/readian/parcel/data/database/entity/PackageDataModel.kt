@@ -1,9 +1,26 @@
 package net.readian.parcel.data.database.entity
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "packages")
+@Entity(
+    tableName = "packages",
+    indices = [
+        Index(value = ["lastUpdated"]),
+        Index(value = ["carrierCode"]),
+    ],
+    foreignKeys = [
+        ForeignKey(
+            entity = CarrierDataModel::class,
+            parentColumns = ["code"],
+            childColumns = ["carrierCode"],
+            onDelete = ForeignKey.NO_ACTION,
+            onUpdate = ForeignKey.NO_ACTION,
+        ),
+    ],
+)
 data class PackageDataModel(
     @PrimaryKey
     val trackingNumber: String,
@@ -11,8 +28,11 @@ data class PackageDataModel(
     val description: String,
     val statusCode: DeliveryStatusDataModel,
     val lastUpdated: Long,
-    val eventsJson: String,
-    val extraInformationJson: String
+    val extraInformation: String,
+    val expectedAt: Long?,
+    val expectedEndAt: Long?,
+    val expectedDateRaw: String?,
+    val expectedEndDateRaw: String?,
 )
 
 enum class DeliveryStatusDataModel {
@@ -24,5 +44,5 @@ enum class DeliveryStatusDataModel {
     NOT_FOUND,
     FAILED_DELIVERY,
     EXCEPTION,
-    CARRIER_INFORMED
+    CARRIER_INFORMED,
 }

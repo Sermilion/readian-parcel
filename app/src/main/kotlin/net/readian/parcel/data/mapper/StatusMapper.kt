@@ -8,7 +8,7 @@ import net.readian.parcel.domain.model.DeliveryStatus
  * Handles conversion between database entity status and domain status
  */
 object StatusMapper {
-    
+
     /**
      * Maps database entity status to domain status
      */
@@ -25,7 +25,7 @@ object StatusMapper {
             DeliveryStatusDataModel.CARRIER_INFORMED -> DeliveryStatus.CARRIER_INFORMED
         }
     }
-    
+
     /**
      * Maps domain status to database entity status
      */

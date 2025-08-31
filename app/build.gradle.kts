@@ -1,7 +1,5 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import io.readian.android.ReadianBuildType
-
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.ksp)
@@ -9,10 +7,8 @@ plugins {
     alias(libs.plugins.readian.android.application)
     alias(libs.plugins.readian.android.application.compose)
     alias(libs.plugins.readian.android.application.flavors)
-    alias(libs.plugins.readian.android.application.jacoco)
     alias(libs.plugins.readian.android.hilt)
     alias(libs.plugins.readian.android.room)
-    id("jacoco")
     // alias(libs.plugins.readian.android.application.firebase) // Disabled until Firebase is properly configured
 }
 
@@ -84,9 +80,12 @@ protobuf {
 }
 
 dependencies {
+    implementation(libs.androidx.material3.android)
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
 
     androidTestImplementation(kotlin("test"))
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.compose.ui.test)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
@@ -94,7 +93,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.lifecycle.runtimeCompose)
-    implementation("androidx.lifecycle:lifecycle-process:2.7.0")
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.compose.runtime.tracing)
     implementation(libs.androidx.compose.material3.windowSizeClass)
     implementation(libs.androidx.hilt.navigation.compose)
@@ -105,8 +104,6 @@ dependencies {
     implementation(libs.coil.kt)
     implementation(libs.accompanist.systemuicontroller)
 
-    implementation(libs.compose.material3)
-    implementation(libs.compose.material)
     implementation(libs.compose.material.icons)
     implementation(libs.compose.constraintlayout)
 
@@ -120,15 +117,20 @@ dependencies {
 
     implementation(libs.timber)
 
+    // DataStore for persisting rate limiting state and user preferences
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore)
+    implementation(libs.protobuf.kotlin.lite)
+
     // Security
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    
+    implementation(libs.androidx.security.crypto)
+
     // JSON serialization
     implementation(libs.kotlinx.serialization.json)
-    
+
     // WorkManager for background sync
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
-    
+    implementation(libs.androidx.work.ktx)
+
     // Chucker for network debugging
     debugImplementation("com.github.chuckerteam.chucker:library:4.0.0")
     releaseImplementation("com.github.chuckerteam.chucker:library-no-op:4.0.0")
@@ -138,4 +140,6 @@ dependencies {
     testImplementation(libs.accompanist.testharness)
     testImplementation(libs.work.testing)
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
+    // androidx.test:core not needed for pure JVM unit tests here
 }

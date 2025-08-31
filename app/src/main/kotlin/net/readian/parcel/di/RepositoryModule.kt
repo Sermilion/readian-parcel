@@ -4,9 +4,9 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import net.readian.parcel.data.repository.ApiKeyRepositoryImpl
+import net.readian.parcel.data.repository.ReadianCarrierRepository
 import net.readian.parcel.data.repository.ReadianPackageRepository
-import net.readian.parcel.domain.repository.ApiKeyRepository
+import net.readian.parcel.domain.repository.CarrierRepository
 import net.readian.parcel.domain.repository.PackageRepository
 import javax.inject.Singleton
 
@@ -18,16 +18,16 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-    
+
     @Binds
     @Singleton
     abstract fun bindPackageRepository(
-        readianPackageRepository: ReadianPackageRepository
+        readianPackageRepository: ReadianPackageRepository,
     ): PackageRepository
-    
+
     @Binds
     @Singleton
-    abstract fun bindApiKeyRepository(
-        apiKeyRepositoryImpl: ApiKeyRepositoryImpl
-    ): ApiKeyRepository
+    abstract fun bindCarrierRepository(
+        impl: ReadianCarrierRepository,
+    ): CarrierRepository
 }

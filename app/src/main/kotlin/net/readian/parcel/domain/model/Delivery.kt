@@ -10,7 +10,11 @@ data class Delivery(
     val description: String,
     val status: DeliveryStatus,
     val events: List<DeliveryEvent>,
-    val extraInformation: String
+    val extraInformation: String,
+    val expectedAt: Long? = null,
+    val expectedEndAt: Long? = null,
+    val expectedDateRaw: String? = null,
+    val expectedEndDateRaw: String? = null,
 )
 
 /**
@@ -26,14 +30,15 @@ enum class DeliveryStatus {
     NOT_FOUND,
     FAILED_DELIVERY,
     EXCEPTION,
-    CARRIER_INFORMED
+    CARRIER_INFORMED,
 }
 
 /**
  * Domain model for delivery events
  */
 data class DeliveryEvent(
-    val timestamp: Long,
+    val timestamp: Long?,
     val description: String,
-    val location: String?
+    val location: String?,
+    val rawDate: String? = null,
 )

@@ -1,6 +1,5 @@
 package net.readian.parcel.feature.packages.mapper
 
-import android.content.Context
 import net.readian.parcel.R
 import net.readian.parcel.domain.model.Delivery
 import net.readian.parcel.domain.model.DeliveryEvent
@@ -14,29 +13,35 @@ import net.readian.parcel.feature.packages.model.StatusColor
  * This is where UI-specific logic and formatting happens
  */
 object DeliveryUiMapper {
-    
-    fun toUiModel(domain: Delivery, context: Context): DeliveryUiModel {
+
+    fun toUiModel(domain: Delivery, carrierName: String? = null): DeliveryUiModel {
         return DeliveryUiModel(
             trackingNumber = domain.trackingNumber,
             carrierCode = domain.carrierCode,
+            carrierName = carrierName,
             description = domain.description,
-            statusText = getStatusText(domain.status, context),
+            statusTextRes = getStatusTextRes(domain.status),
             statusColor = getStatusColor(domain.status),
             events = domain.events.map { toUiModel(it) },
-            extraInformation = domain.extraInformation
+            extraInformation = domain.extraInformation,
+            expectedAt = domain.expectedAt,
+            expectedEndAt = domain.expectedEndAt,
+            expectedDateRaw = domain.expectedDateRaw,
+            expectedEndDateRaw = domain.expectedEndDateRaw,
         )
     }
-    
+
     private fun toUiModel(domain: DeliveryEvent): DeliveryEventUiModel {
         return DeliveryEventUiModel(
             timestamp = domain.timestamp,
             description = domain.description,
-            location = domain.location
+            location = domain.location,
+            rawDate = domain.rawDate,
         )
     }
-    
-    private fun getStatusText(status: DeliveryStatus, context: Context): String {
-        val stringRes = when (status) {
+
+    private fun getStatusTextRes(status: DeliveryStatus): Int {
+        return when (status) {
             DeliveryStatus.COMPLETED -> R.string.delivery_status_completed
             DeliveryStatus.FROZEN -> R.string.delivery_status_frozen
             DeliveryStatus.IN_TRANSIT -> R.string.delivery_status_in_transit
@@ -47,9 +52,8 @@ object DeliveryUiMapper {
             DeliveryStatus.EXCEPTION -> R.string.delivery_status_exception
             DeliveryStatus.CARRIER_INFORMED -> R.string.delivery_status_carrier_informed
         }
-        return context.getString(stringRes)
     }
-    
+
     private fun getStatusColor(status: DeliveryStatus): StatusColor {
         return when (status) {
             DeliveryStatus.COMPLETED -> StatusColor.SUCCESS
@@ -60,5 +64,4 @@ object DeliveryUiMapper {
             else -> StatusColor.NEUTRAL
         }
     }
-    
 }

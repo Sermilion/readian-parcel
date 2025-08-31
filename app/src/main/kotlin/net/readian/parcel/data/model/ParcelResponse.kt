@@ -10,7 +10,7 @@ data class ParcelResponse(
     @SerialName("error_message")
     val errorMessage: String? = null,
     @SerialName("deliveries")
-    val deliveries: List<DeliveryResponse> = emptyList()
+    val deliveries: List<DeliveryResponse> = emptyList(),
 )
 
 @Serializable
@@ -26,7 +26,15 @@ data class DeliveryResponse(
     @SerialName("events")
     val events: List<DeliveryEventResponse> = emptyList(),
     @SerialName("extra_information")
-    val extraInformation: String = ""
+    val extraInformation: String = "",
+    @SerialName("timestamp_expected")
+    val timestampExpected: Long? = null,
+    @SerialName("timestamp_expected_end")
+    val timestampExpectedEnd: Long? = null,
+    @SerialName("date_expected")
+    val dateExpected: String? = null,
+    @SerialName("date_expected_end")
+    val dateExpectedEnd: String? = null,
 )
 
 @Serializable
@@ -38,9 +46,10 @@ data class DeliveryEventResponse(
     @SerialName("location")
     val location: String? = null,
     @SerialName("additional")
-    val additional: String? = null
+    val additional: String? = null,
 )
 
+@Suppress("MagicNumber")
 enum class DeliveryStatusResponse(val code: Int) {
     COMPLETED(0),
     FROZEN(1),
@@ -50,7 +59,8 @@ enum class DeliveryStatusResponse(val code: Int) {
     NOT_FOUND(5),
     FAILED_DELIVERY(6),
     EXCEPTION(7),
-    CARRIER_INFORMED(8);
+    CARRIER_INFORMED(8),
+    ;
 
     companion object Companion {
         fun fromCode(code: Int): DeliveryStatusResponse =
