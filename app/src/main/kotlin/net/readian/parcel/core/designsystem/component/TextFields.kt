@@ -13,30 +13,30 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun StarterAppTextField(
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    isError: Boolean = false,
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    keyboardOptions: KeyboardOptions = KeyboardOptions(
-        imeAction = ImeAction.Done,
-    ),
-    onValueChanged: (String) -> Unit,
+  value: String,
+  label: String,
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+  isError: Boolean = false,
+  visualTransformation: VisualTransformation = VisualTransformation.None,
+  keyboardOptions: KeyboardOptions = KeyboardOptions(
+    imeAction = ImeAction.Done,
+  ),
+  onValueChanged: (String) -> Unit,
 ) {
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp)
-            .then(modifier),
-        value = value,
-        enabled = enabled,
-        isError = isError,
-        maxLines = 1,
-        singleLine = true,
-        onValueChange = onValueChanged,
-        keyboardOptions = keyboardOptions,
-        label = { Text(text = label) },
-        visualTransformation = visualTransformation,
-    )
+  OutlinedTextField(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 32.dp)
+      .then(modifier),
+    value = value,
+    enabled = enabled,
+    isError = isError,
+    maxLines = 1,
+    singleLine = true,
+    onValueChange = onValueChanged,
+    keyboardOptions = keyboardOptions,
+    label = { Text(text = label) },
+    visualTransformation = visualTransformation,
+  )
 }

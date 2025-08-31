@@ -10,46 +10,46 @@ import javax.inject.Singleton
 
 @Singleton
 class ApiKeyRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+  @ApplicationContext private val context: Context,
 ) {
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+  private val masterKey = MasterKey.Builder(context)
+    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+    .build()
 
-    private val encryptedPrefs = EncryptedSharedPreferences.create(
-        context,
-        "parcel_api_prefs",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-    )
+  private val encryptedPrefs = EncryptedSharedPreferences.create(
+    context,
+    "parcel_api_prefs",
+    masterKey,
+    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+  )
 
-    fun setApiKey(apiKey: String) {
-        val sanitized = apiKey
-            .replace("\r", "")
-            .replace("\n", "")
-            .trim()
-        encryptedPrefs.edit { putString(API_KEY_PREF, sanitized) }
-    }
+  fun setApiKey(apiKey: String) {
+    val sanitized = apiKey
+      .replace("\r", "")
+      .replace("\n", "")
+      .trim()
+    encryptedPrefs.edit { putString(API_KEY_PREF, sanitized) }
+  }
 
-    fun getApiKey(): String? {
-        val raw = encryptedPrefs.getString(API_KEY_PREF, null)
-        val sanitized = raw
-            ?.replace("\r", "")
-            ?.replace("\n", "")
-            ?.trim()
-        return sanitized?.takeIf { !it.isNullOrBlank() }
-    }
+  fun getApiKey(): String? {
+    val raw = encryptedPrefs.getString(API_KEY_PREF, null)
+    val sanitized = raw
+      ?.replace("\r", "")
+      ?.replace("\n", "")
+      ?.trim()
+    return sanitized?.takeIf { !it.isNullOrBlank() }
+  }
 
-    fun hasApiKey(): Boolean {
-        return !getApiKey().isNullOrBlank()
-    }
+  fun hasApiKey(): Boolean {
+    return !getApiKey().isNullOrBlank()
+  }
 
-    fun clearApiKey() {
-        encryptedPrefs.edit { remove(API_KEY_PREF) }
-    }
+  fun clearApiKey() {
+    encryptedPrefs.edit { remove(API_KEY_PREF) }
+  }
 
-    companion object Companion {
-        private const val API_KEY_PREF = "api_key"
-    }
+  companion object Companion {
+    private const val API_KEY_PREF = "api_key"
+  }
 }

@@ -6,8 +6,8 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface ParcelApiService {
-    @GET("external/deliveries/")
-    suspend fun getDeliveries(
-        @Query("filter_mode") filterMode: String = "recent",
-    ): Response<ParcelResponse>
+  @GET("external/deliveries/")
+  suspend fun getDeliveries(
+    @Query("filter_mode") filterMode: String = "recent",
+  ): Response<ParcelResponse>
 }

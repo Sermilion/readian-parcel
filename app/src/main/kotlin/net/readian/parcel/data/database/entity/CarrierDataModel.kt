@@ -5,11 +5,11 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "carriers",
-    indices = [Index(value = ["name"])],
+  tableName = "carriers",
+  indices = [Index(value = ["name"])],
 )
 data class CarrierDataModel(
-    @PrimaryKey val code: String,
-    val name: String,
-    val updatedAt: Long,
+  @PrimaryKey val code: String,
+  val name: String,
+  val updatedAt: Long,
 )

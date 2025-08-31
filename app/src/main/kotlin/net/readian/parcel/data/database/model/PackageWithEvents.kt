@@ -6,10 +6,10 @@ import net.readian.parcel.data.database.entity.DeliveryEventDataModel
 import net.readian.parcel.data.database.entity.PackageDataModel
 
 data class PackageWithEvents(
-    @Embedded val pkg: PackageDataModel,
-    @Relation(
-        parentColumn = "trackingNumber",
-        entityColumn = "trackingNumber",
-    )
-    val events: List<DeliveryEventDataModel>,
+  @Embedded val pkg: PackageDataModel,
+  @Relation(
+    parentColumn = "trackingNumber",
+    entityColumn = "trackingNumber",
+  )
+  val events: List<DeliveryEventDataModel>,
 )

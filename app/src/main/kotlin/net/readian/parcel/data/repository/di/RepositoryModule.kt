@@ -1,4 +1,4 @@
-package net.readian.parcel.di
+package net.readian.parcel.data.repository.di
 
 import dagger.Binds
 import dagger.Module
@@ -19,15 +19,15 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
 
-    @Binds
-    @Singleton
-    abstract fun bindPackageRepository(
-        readianPackageRepository: ReadianPackageRepository,
-    ): PackageRepository
+  @Binds
+  @Singleton
+  abstract fun bindPackageRepository(
+    readianPackageRepository: ReadianPackageRepository,
+  ): PackageRepository
 
-    @Binds
-    @Singleton
-    abstract fun bindCarrierRepository(
-        impl: ReadianCarrierRepository,
-    ): CarrierRepository
+  @Binds
+  @Singleton
+  abstract fun bindCarrierRepository(
+    impl: ReadianCarrierRepository,
+  ): CarrierRepository
 }

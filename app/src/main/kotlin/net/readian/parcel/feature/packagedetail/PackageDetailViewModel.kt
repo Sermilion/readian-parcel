@@ -16,28 +16,28 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PackageDetailViewModel @Inject constructor(
-    repository: PackageRepository,
-    savedStateHandle: SavedStateHandle,
+  repository: PackageRepository,
+  savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val args = PackageDetailDestination(
-        packageId = requireNotNull(savedStateHandle.get<String>("packageId")),
-    )
+  private val args = PackageDetailDestination(
+    packageId = requireNotNull(savedStateHandle.get<String>("packageId")),
+  )
 
-    val uiState: StateFlow<UiState> = repository.getPackage(args.packageId)
-        .map { delivery ->
-            delivery?.let { UiState.Data(DeliveryUiMapper.toUiModel(it)) }
-                ?: UiState.NotFound
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = UiState.Loading,
-        )
+  val uiState: StateFlow<UiState> = repository.getPackage(args.packageId)
+    .map { delivery ->
+      delivery?.let { UiState.Data(DeliveryUiMapper.toUiModel(it)) }
+        ?: UiState.NotFound
+    }
+    .stateIn(
+      scope = viewModelScope,
+      started = SharingStarted.WhileSubscribed(5000),
+      initialValue = UiState.Loading,
+    )
 }
 
 sealed interface UiState {
-    data object Loading : UiState
-    data object NotFound : UiState
-    data class Data(val delivery: DeliveryUiModel) : UiState
+  data object Loading : UiState
+  data object NotFound : UiState
+  data class Data(val delivery: DeliveryUiModel) : UiState
 }

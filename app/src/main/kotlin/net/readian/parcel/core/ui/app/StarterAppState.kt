@@ -11,24 +11,24 @@ import net.readian.parcel.core.navigation.ParcelDestination
 
 @Composable
 fun rememberStarterAppState(
-    navController: NavHostController = rememberNavController(),
+  navController: NavHostController = rememberNavController(),
 ): StarterAppState {
-    return remember(navController) {
-        StarterAppState(navController = navController)
-    }
+  return remember(navController) {
+    StarterAppState(navController = navController)
+  }
 }
 
 @Stable
 class StarterAppState(val navController: NavHostController) {
 
-    val currentDestination: NavDestination?
-        @Composable get() = navController.currentBackStackEntryAsState().value?.destination
+  val currentDestination: NavDestination?
+    @Composable get() = navController.currentBackStackEntryAsState().value?.destination
 
-    fun navigate(destination: ParcelDestination) {
-        navController.navigate(destination)
-    }
+  fun navigate(destination: ParcelDestination) {
+    navController.navigate(destination)
+  }
 
-    fun onBackClick() {
-        navController.popBackStack()
-    }
+  fun onBackClick() {
+    navController.popBackStack()
+  }
 }

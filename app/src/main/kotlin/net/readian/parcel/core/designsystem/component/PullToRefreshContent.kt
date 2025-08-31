@@ -13,27 +13,27 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun PullToRefreshContent(
-    onRefresh: () -> Unit,
-    modifier: Modifier = Modifier,
-    refreshing: Boolean = false,
-    content: @Composable BoxScope.() -> Unit,
+  onRefresh: () -> Unit,
+  modifier: Modifier = Modifier,
+  refreshing: Boolean = false,
+  content: @Composable BoxScope.() -> Unit,
 ) {
-    var refreshRequested by remember { mutableStateOf(false) }
+  var refreshRequested by remember { mutableStateOf(false) }
 
-    val refreshingState by remember(refreshing, refreshRequested) {
-        derivedStateOf { refreshing && refreshRequested }
-    }
+  val refreshingState by remember(refreshing, refreshRequested) {
+    derivedStateOf { refreshing && refreshRequested }
+  }
 
-    val pullRefreshState = rememberPullToRefreshState()
+  val pullRefreshState = rememberPullToRefreshState()
 
-    PullToRefreshBox(
-        isRefreshing = refreshingState,
-        state = pullRefreshState,
-        modifier = modifier,
-        onRefresh = {
-            refreshRequested = true
-            onRefresh()
-        },
-        content = content,
-    )
+  PullToRefreshBox(
+    isRefreshing = refreshingState,
+    state = pullRefreshState,
+    modifier = modifier,
+    onRefresh = {
+      refreshRequested = true
+      onRefresh()
+    },
+    content = content,
+  )
 }

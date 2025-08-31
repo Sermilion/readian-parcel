@@ -27,40 +27,40 @@ import net.readian.parcel.data.datastore.ReadianUserDataStore
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ParcelApp(
-    userDataStore: ReadianUserDataStore,
-    modifier: Modifier = Modifier,
-    appState: StarterAppState = rememberStarterAppState(),
+  userDataStore: ReadianUserDataStore,
+  modifier: Modifier = Modifier,
+  appState: StarterAppState = rememberStarterAppState(),
 ) {
-    val isLoggedIn by userDataStore.userData.map {
-        it.isLoggedIn
-    }.collectAsStateWithLifecycle(initialValue = false)
+  val isLoggedIn by userDataStore.userData.map {
+    it.isLoggedIn
+  }.collectAsStateWithLifecycle(initialValue = false)
 
-    StarterAppTheme {
-        ReadianBackground {
-            UpdateChecker {
-                val systemUiController = rememberSystemUiController()
-                systemUiController.setSystemBarsColor(MaterialTheme.colorScheme.background)
+  StarterAppTheme {
+    ReadianBackground {
+      UpdateChecker {
+        val systemUiController = rememberSystemUiController()
+        systemUiController.setSystemBarsColor(MaterialTheme.colorScheme.background)
 
-                Scaffold(
-                    modifier = Modifier
-                        .systemBarsPadding()
-                        .then(modifier),
-                ) { innerPadding ->
-                    ParcelNavHost(
-                        navController = appState.navController,
-                        hasApiKey = isLoggedIn,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                            .consumeWindowInsets(innerPadding)
-                            .windowInsetsPadding(
-                                WindowInsets.safeDrawing.only(
-                                    WindowInsetsSides.Vertical,
-                                ),
-                            ),
-                    )
-                }
-            }
+        Scaffold(
+          modifier = Modifier
+            .systemBarsPadding()
+            .then(modifier),
+        ) { innerPadding ->
+          ParcelNavHost(
+            navController = appState.navController,
+            hasApiKey = isLoggedIn,
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(innerPadding)
+              .consumeWindowInsets(innerPadding)
+              .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(
+                  WindowInsetsSides.Vertical,
+                ),
+              ),
+          )
         }
+      }
     }
+  }
 }

@@ -13,40 +13,46 @@ import net.readian.parcel.data.database.model.PackageWithEvents
 @Dao
 interface PackageDao {
 
-    @Query("SELECT * FROM packages ORDER BY lastUpdated DESC")
-    fun getAllPackages(): Flow<List<PackageDataModel>>
+  @Query("SELECT * FROM packages ORDER BY lastUpdated DESC")
+  fun getAllPackages(): Flow<List<PackageDataModel>>
 
-    @Query("SELECT * FROM packages WHERE trackingNumber = :trackingNumber")
-    suspend fun getPackageByTrackingNumber(trackingNumber: String): PackageDataModel?
+  @Query("SELECT * FROM packages WHERE trackingNumber = :trackingNumber")
+  suspend fun getPackageByTrackingNumber(trackingNumber: String): PackageDataModel?
 
-    @Query("SELECT * FROM packages WHERE trackingNumber = :trackingNumber")
-    fun observePackageByTrackingNumber(trackingNumber: String): Flow<PackageDataModel?>
+  @Query("SELECT * FROM packages WHERE trackingNumber = :trackingNumber")
+  fun observePackageByTrackingNumber(trackingNumber: String): Flow<PackageDataModel?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPackages(packages: List<PackageDataModel>)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insertPackages(packages: List<PackageDataModel>)
 
-    @Query("DELETE FROM packages")
-    suspend fun clearAllPackages()
+  @Query("DELETE FROM packages")
+  suspend fun clearAllPackages()
 
-    @Query("SELECT lastUpdated FROM packages ORDER BY lastUpdated DESC LIMIT 1")
-    suspend fun getLastUpdateTime(): Long?
+  @Query("SELECT lastUpdated FROM packages ORDER BY lastUpdated DESC LIMIT 1")
+  suspend fun getLastUpdateTime(): Long?
 
-    // Events operations
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertEvents(events: List<DeliveryEventDataModel>)
+  // Events operations
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insertEvents(events: List<DeliveryEventDataModel>)
 
-    @Query("DELETE FROM package_events WHERE trackingNumber = :trackingNumber")
-    suspend fun clearEventsForTracking(trackingNumber: String)
+  @Query("DELETE FROM package_events WHERE trackingNumber = :trackingNumber")
+  suspend fun clearEventsForTracking(trackingNumber: String)
 
-    @Query("DELETE FROM package_events")
-    suspend fun clearAllEvents()
+  @Query("DELETE FROM package_events")
+  suspend fun clearAllEvents()
 
-    // Relations
-    @Transaction
-    @Query("SELECT * FROM packages ORDER BY lastUpdated DESC")
-    fun observeAllPackagesWithEvents(): Flow<List<PackageWithEvents>>
+  // Relations
+  @Transaction
+  @Query("SELECT * FROM packages ORDER BY lastUpdated DESC")
+  fun observeAllPackagesWithEvents(): Flow<List<PackageWithEvents>>
 
-    @Transaction
-    @Query("SELECT * FROM packages WHERE trackingNumber = :trackingNumber")
-    fun observePackageWithEvents(trackingNumber: String): Flow<PackageWithEvents?>
+  @Transaction
+  @Query("SELECT * FROM packages WHERE trackingNumber = :trackingNumber")
+  fun observePackageWithEvents(trackingNumber: String): Flow<PackageWithEvents?>
+
+  @Query("SELECT * FROM packages WHERE statusCode != 'COMPLETED'")
+  suspend fun getActivePackages(): List<PackageDataModel>
+
+  @Query("UPDATE packages SET lastNotifiedStatus = :status WHERE trackingNumber = :trackingNumber")
+  suspend fun updateLastNotifiedStatus(trackingNumber: String, status: net.readian.parcel.data.database.entity.DeliveryStatusDataModel)
 }

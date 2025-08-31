@@ -10,16 +10,16 @@ import timber.log.Timber
 
 @HiltAndroidApp
 class StarterApplication :
-    Application(),
-    LifecycleEventObserver {
+  Application(),
+  LifecycleEventObserver {
 
-    override fun onCreate() {
-        super.onCreate()
-        Timber.plant(Timber.DebugTree())
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-    }
+  override fun onCreate() {
+    super.onCreate()
+    Timber.plant(Timber.DebugTree())
+    ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+  }
 
-    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-        Unit
-    }
+  override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+    // No-op
+  }
 }

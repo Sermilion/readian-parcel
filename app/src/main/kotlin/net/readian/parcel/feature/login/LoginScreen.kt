@@ -45,142 +45,142 @@ import net.readian.parcel.feature.login.LoginContract.UiState
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
-    viewModel: LoginViewModel,
+  onLoginSuccess: () -> Unit,
+  viewModel: LoginViewModel,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LoginContent(
-        state = uiState,
-        onApiKeyChange = viewModel::onApiKeyChanged,
-        onSubmit = { viewModel.validateAndSaveApiKey(onLoginSuccess) },
-    )
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  LoginContent(
+    state = uiState,
+    onApiKeyChange = viewModel::onApiKeyChanged,
+    onSubmit = { viewModel.validateAndSaveApiKey(onLoginSuccess) },
+  )
 }
 
 @Composable
 fun LoginContent(
-    state: UiState,
-    onApiKeyChange: (String) -> Unit,
-    onSubmit: () -> Unit,
-    modifier: Modifier = Modifier,
+  state: UiState,
+  onApiKeyChange: (String) -> Unit,
+  onSubmit: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-    val snackBarHostState = androidx.compose.runtime.remember { SnackbarHostState() }
+  val snackBarHostState = androidx.compose.runtime.remember { SnackbarHostState() }
 
-    val errorMessage: String? = when (state.error) {
-        LoginError.EmptyKey -> stringResource(id = R.string.error_api_key_empty)
-        LoginError.InvalidKey -> stringResource(id = R.string.error_invalid_api_key)
-        LoginError.Network -> stringResource(id = R.string.error_network_validation)
-        null -> null
-    }
+  val errorMessage: String? = when (state.error) {
+    LoginError.EmptyKey -> stringResource(id = R.string.error_api_key_empty)
+    LoginError.InvalidKey -> stringResource(id = R.string.error_invalid_api_key)
+    LoginError.Network -> stringResource(id = R.string.error_network_validation)
+    null -> null
+  }
 
-    if (state.isError && errorMessage != null) {
-        LaunchedEffect(errorMessage) { snackBarHostState.showSnackbar(errorMessage) }
-    }
+  if (state.isError && errorMessage != null) {
+    LaunchedEffect(errorMessage) { snackBarHostState.showSnackbar(errorMessage) }
+  }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-    ) { paddingValues ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Inventory,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(64.dp),
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(id = R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(bottom = 32.dp),
-            )
+  Scaffold(
+    snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+  ) { paddingValues ->
+    Column(
+      modifier = modifier
+        .fillMaxSize()
+        .padding(paddingValues)
+        .padding(24.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center,
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Inventory,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.size(64.dp),
+      )
+      Spacer(modifier = Modifier.height(16.dp))
+      Text(
+        text = stringResource(id = R.string.app_name),
+        style = MaterialTheme.typography.headlineLarge,
+        modifier = Modifier.padding(bottom = 32.dp),
+      )
 
-            PasswordInputField(
-                state = state,
-                onValueChange = onApiKeyChange,
-                onSubmit = onSubmit,
-                errorMessage = errorMessage,
-            )
+      PasswordInputField(
+        state = state,
+        onValueChange = onApiKeyChange,
+        onSubmit = onSubmit,
+        errorMessage = errorMessage,
+      )
 
-            Spacer(modifier = Modifier.height(16.dp))
+      Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = onSubmit,
-                enabled = !state.isLoading && state.apiKey.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                    )
-                } else {
-                    Text(stringResource(id = R.string.login))
-                }
-            }
+      Button(
+        onClick = onSubmit,
+        enabled = !state.isLoading && state.apiKey.isNotBlank(),
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        if (state.isLoading) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(20.dp),
+            strokeWidth = 2.dp,
+          )
+        } else {
+          Text(stringResource(id = R.string.login))
         }
+      }
     }
+  }
 }
 
 @Composable
 private fun PasswordInputField(
-    state: UiState,
-    onValueChange: (String) -> Unit,
-    onSubmit: () -> Unit,
-    errorMessage: String?,
+  state: UiState,
+  onValueChange: (String) -> Unit,
+  onSubmit: () -> Unit,
+  errorMessage: String?,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    var passwordVisible by remember { mutableStateOf(false) }
+  val keyboardController = LocalSoftwareKeyboardController.current
+  var passwordVisible by remember { mutableStateOf(false) }
 
-    OutlinedTextField(
-        value = state.apiKey,
-        onValueChange = onValueChange,
-        label = { Text(stringResource(id = R.string.api_key)) },
-        placeholder = { Text(stringResource(id = R.string.enter_api_key)) },
-        visualTransformation = if (passwordVisible) {
-            VisualTransformation.None
-        } else {
-            PasswordVisualTransformation()
-        },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                keyboardController?.hide()
-                onSubmit()
-            },
-        ),
-        isError = state.isError,
-        supportingText = errorMessage?.let { msg -> { Text(msg) } },
-        trailingIcon = {
-            PasswordVisibilityButton(passwordVisible) {
-                passwordVisible = !passwordVisible
-            }
-        },
-        modifier = Modifier.fillMaxWidth(),
-        maxLines = 1,
-    )
+  OutlinedTextField(
+    value = state.apiKey,
+    onValueChange = onValueChange,
+    label = { Text(stringResource(id = R.string.api_key)) },
+    placeholder = { Text(stringResource(id = R.string.enter_api_key)) },
+    visualTransformation = if (passwordVisible) {
+      VisualTransformation.None
+    } else {
+      PasswordVisualTransformation()
+    },
+    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+    keyboardActions = KeyboardActions(
+      onDone = {
+        keyboardController?.hide()
+        onSubmit()
+      },
+    ),
+    isError = state.isError,
+    supportingText = errorMessage?.let { msg -> { Text(msg) } },
+    trailingIcon = {
+      PasswordVisibilityButton(passwordVisible) {
+        passwordVisible = !passwordVisible
+      }
+    },
+    modifier = Modifier.fillMaxWidth(),
+    maxLines = 1,
+  )
 }
 
 @Composable
 private fun PasswordVisibilityButton(passwordVisible: Boolean, onClick: () -> Unit) {
-    val contentDesc = if (passwordVisible) {
-        stringResource(id = R.string.hide_password)
-    } else {
-        stringResource(id = R.string.show_password)
-    }
-    IconButton(onClick = onClick) {
-        Icon(
-            imageVector = if (passwordVisible) {
-                Icons.Filled.VisibilityOff
-            } else {
-                Icons.Filled.Visibility
-            },
-            contentDescription = contentDesc,
-        )
-    }
+  val contentDesc = if (passwordVisible) {
+    stringResource(id = R.string.hide_password)
+  } else {
+    stringResource(id = R.string.show_password)
+  }
+  IconButton(onClick = onClick) {
+    Icon(
+      imageVector = if (passwordVisible) {
+        Icons.Filled.VisibilityOff
+      } else {
+        Icons.Filled.Visibility
+      },
+      contentDescription = contentDesc,
+    )
+  }
 }

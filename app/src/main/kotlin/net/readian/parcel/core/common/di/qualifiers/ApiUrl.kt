@@ -1,4 +1,4 @@
-package net.readian.parcel.di.qualifiers
+package net.readian.parcel.core.common.di.qualifiers
 
 import javax.inject.Qualifier
 

@@ -22,45 +22,45 @@ import com.google.common.collect.ImmutableList
 
 @Composable
 fun StarterAppDropdownMenu(
-    items: ImmutableList<String>,
-    modifier: Modifier = Modifier,
-    onItemSelected: (String) -> Unit,
+  items: ImmutableList<String>,
+  modifier: Modifier = Modifier,
+  onItemSelected: (String) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableIntStateOf(0) }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .padding(top = 8.dp)
-            .padding(horizontal = 32.dp)
-            .wrapContentSize(Alignment.Center)
-            .then(modifier),
+  var expanded by remember { mutableStateOf(false) }
+  var selectedIndex by remember { mutableIntStateOf(0) }
+  Box(
+    modifier = Modifier
+      .fillMaxWidth()
+      .height(48.dp)
+      .padding(top = 8.dp)
+      .padding(horizontal = 32.dp)
+      .wrapContentSize(Alignment.Center)
+      .then(modifier),
+  ) {
+    Text(
+      items[selectedIndex],
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 4.dp)
+        .clickable(onClick = { expanded = true }),
+    )
+    DropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 32.dp),
     ) {
-        Text(
-            items[selectedIndex],
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp)
-                .clickable(onClick = { expanded = true }),
+      items.forEachIndexed { index, item ->
+        DropdownMenuItem(
+          text = { Text(text = item) },
+          onClick = {
+            selectedIndex = index
+            expanded = false
+            onItemSelected(item)
+          },
         )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-        ) {
-            items.forEachIndexed { index, item ->
-                DropdownMenuItem(
-                    text = { Text(text = item) },
-                    onClick = {
-                        selectedIndex = index
-                        expanded = false
-                        onItemSelected(item)
-                    },
-                )
-            }
-        }
+      }
     }
+  }
 }

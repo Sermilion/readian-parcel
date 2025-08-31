@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ApiErrorResponse(
-    @SerialName("success") val success: Boolean = false,
-    @SerialName("error_message") val errorMessage: String? = null,
+  @SerialName("success") val success: Boolean = false,
+  @SerialName("error_message") val errorMessage: String? = null,
 )

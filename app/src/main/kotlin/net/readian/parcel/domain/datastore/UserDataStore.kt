@@ -4,9 +4,9 @@ import kotlinx.coroutines.flow.Flow
 import net.readian.parcel.domain.model.UserDataModel
 
 interface UserDataStore {
-    val userData: Flow<UserDataModel>
+  val userData: Flow<UserDataModel>
 
-    suspend fun setLoggedIn(loggedIn: Boolean)
+  suspend fun setLoggedIn(loggedIn: Boolean)
 
-    suspend fun logout()
+  suspend fun logout()
 }

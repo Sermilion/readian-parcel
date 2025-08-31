@@ -16,41 +16,41 @@ import javax.inject.Singleton
 
 @Singleton
 class ReadianUserDataStore @Inject constructor(
-    private val dataStore: DataStore<UserData>,
+  private val dataStore: DataStore<UserData>,
 ) : UserDataStore {
-    override val userData: Flow<UserDataModel> = dataStore.data.map { protoData ->
-        UserDataModel(
-            isLoggedIn = protoData.isLoggedIn,
-        )
-    }
+  override val userData: Flow<UserDataModel> = dataStore.data.map { protoData ->
+    UserDataModel(
+      isLoggedIn = protoData.isLoggedIn,
+    )
+  }
 
-    override suspend fun setLoggedIn(loggedIn: Boolean) {
-        dataStore.updateData { userData ->
-            userData.toBuilder()
-                .setIsLoggedIn(loggedIn)
-                .build()
-        }
+  override suspend fun setLoggedIn(loggedIn: Boolean) {
+    dataStore.updateData { userData ->
+      userData.toBuilder()
+        .setIsLoggedIn(loggedIn)
+        .build()
     }
+  }
 
-    override suspend fun logout() {
-        dataStore.updateData { userData ->
-            userData.toBuilder()
-                .setIsLoggedIn(false)
-                .build()
-        }
+  override suspend fun logout() {
+    dataStore.updateData { userData ->
+      userData.toBuilder()
+        .setIsLoggedIn(false)
+        .build()
     }
+  }
 }
 
 object UserDataSerializer : Serializer<UserData> {
-    override val defaultValue: UserData = UserData.getDefaultInstance()
+  override val defaultValue: UserData = UserData.getDefaultInstance()
 
-    override suspend fun readFrom(input: InputStream): UserData {
-        return try {
-            UserData.parseFrom(input)
-        } catch (exception: InvalidProtocolBufferException) {
-            throw CorruptionException("Cannot read proto.", exception)
-        }
+  override suspend fun readFrom(input: InputStream): UserData {
+    return try {
+      UserData.parseFrom(input)
+    } catch (exception: InvalidProtocolBufferException) {
+      throw CorruptionException("Cannot read proto.", exception)
     }
+  }
 
-    override suspend fun writeTo(t: UserData, output: OutputStream) = t.writeTo(output)
+  override suspend fun writeTo(t: UserData, output: OutputStream) = t.writeTo(output)
 }

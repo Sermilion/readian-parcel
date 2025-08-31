@@ -9,37 +9,54 @@ import net.readian.parcel.domain.model.DeliveryStatus
  */
 object StatusMapper {
 
-    /**
-     * Maps database entity status to domain status
-     */
-    fun toDomain(dataStatus: DeliveryStatusDataModel): DeliveryStatus {
-        return when (dataStatus) {
-            DeliveryStatusDataModel.COMPLETED -> DeliveryStatus.COMPLETED
-            DeliveryStatusDataModel.FROZEN -> DeliveryStatus.FROZEN
-            DeliveryStatusDataModel.IN_TRANSIT -> DeliveryStatus.IN_TRANSIT
-            DeliveryStatusDataModel.EXPECTING_PICKUP -> DeliveryStatus.EXPECTING_PICKUP
-            DeliveryStatusDataModel.OUT_FOR_DELIVERY -> DeliveryStatus.OUT_FOR_DELIVERY
-            DeliveryStatusDataModel.NOT_FOUND -> DeliveryStatus.NOT_FOUND
-            DeliveryStatusDataModel.FAILED_DELIVERY -> DeliveryStatus.FAILED_DELIVERY
-            DeliveryStatusDataModel.EXCEPTION -> DeliveryStatus.EXCEPTION
-            DeliveryStatusDataModel.CARRIER_INFORMED -> DeliveryStatus.CARRIER_INFORMED
-        }
+  /**
+   * Maps database entity status to domain status
+   */
+  fun toDomain(dataStatus: DeliveryStatusDataModel): DeliveryStatus {
+    return when (dataStatus) {
+      DeliveryStatusDataModel.COMPLETED -> DeliveryStatus.COMPLETED
+      DeliveryStatusDataModel.FROZEN -> DeliveryStatus.FROZEN
+      DeliveryStatusDataModel.IN_TRANSIT -> DeliveryStatus.IN_TRANSIT
+      DeliveryStatusDataModel.EXPECTING_PICKUP -> DeliveryStatus.EXPECTING_PICKUP
+      DeliveryStatusDataModel.OUT_FOR_DELIVERY -> DeliveryStatus.OUT_FOR_DELIVERY
+      DeliveryStatusDataModel.NOT_FOUND -> DeliveryStatus.NOT_FOUND
+      DeliveryStatusDataModel.FAILED_DELIVERY -> DeliveryStatus.FAILED_DELIVERY
+      DeliveryStatusDataModel.EXCEPTION -> DeliveryStatus.EXCEPTION
+      DeliveryStatusDataModel.CARRIER_INFORMED -> DeliveryStatus.CARRIER_INFORMED
     }
+  }
 
-    /**
-     * Maps domain status to database entity status
-     */
-    fun toData(domainStatus: DeliveryStatus): DeliveryStatusDataModel {
-        return when (domainStatus) {
-            DeliveryStatus.COMPLETED -> DeliveryStatusDataModel.COMPLETED
-            DeliveryStatus.FROZEN -> DeliveryStatusDataModel.FROZEN
-            DeliveryStatus.IN_TRANSIT -> DeliveryStatusDataModel.IN_TRANSIT
-            DeliveryStatus.EXPECTING_PICKUP -> DeliveryStatusDataModel.EXPECTING_PICKUP
-            DeliveryStatus.OUT_FOR_DELIVERY -> DeliveryStatusDataModel.OUT_FOR_DELIVERY
-            DeliveryStatus.NOT_FOUND -> DeliveryStatusDataModel.NOT_FOUND
-            DeliveryStatus.FAILED_DELIVERY -> DeliveryStatusDataModel.FAILED_DELIVERY
-            DeliveryStatus.EXCEPTION -> DeliveryStatusDataModel.EXCEPTION
-            DeliveryStatus.CARRIER_INFORMED -> DeliveryStatusDataModel.CARRIER_INFORMED
-        }
+  /**
+   * Maps domain status to database entity status
+   */
+  fun toData(domainStatus: DeliveryStatus): DeliveryStatusDataModel {
+    return when (domainStatus) {
+      DeliveryStatus.COMPLETED -> DeliveryStatusDataModel.COMPLETED
+      DeliveryStatus.FROZEN -> DeliveryStatusDataModel.FROZEN
+      DeliveryStatus.IN_TRANSIT -> DeliveryStatusDataModel.IN_TRANSIT
+      DeliveryStatus.EXPECTING_PICKUP -> DeliveryStatusDataModel.EXPECTING_PICKUP
+      DeliveryStatus.OUT_FOR_DELIVERY -> DeliveryStatusDataModel.OUT_FOR_DELIVERY
+      DeliveryStatus.NOT_FOUND -> DeliveryStatusDataModel.NOT_FOUND
+      DeliveryStatus.FAILED_DELIVERY -> DeliveryStatusDataModel.FAILED_DELIVERY
+      DeliveryStatus.EXCEPTION -> DeliveryStatusDataModel.EXCEPTION
+      DeliveryStatus.CARRIER_INFORMED -> DeliveryStatusDataModel.CARRIER_INFORMED
     }
+  }
+
+  /**
+   * Maps database status to display text resource
+   */
+  fun mapToDisplayText(dataStatus: DeliveryStatusDataModel): String {
+    return when (dataStatus) {
+      DeliveryStatusDataModel.COMPLETED -> "Delivered"
+      DeliveryStatusDataModel.FROZEN -> "Frozen"
+      DeliveryStatusDataModel.IN_TRANSIT -> "In Transit"
+      DeliveryStatusDataModel.EXPECTING_PICKUP -> "Expecting Pickup"
+      DeliveryStatusDataModel.OUT_FOR_DELIVERY -> "Out for Delivery"
+      DeliveryStatusDataModel.NOT_FOUND -> "Not Found"
+      DeliveryStatusDataModel.FAILED_DELIVERY -> "Failed Delivery"
+      DeliveryStatusDataModel.EXCEPTION -> "Exception"
+      DeliveryStatusDataModel.CARRIER_INFORMED -> "Carrier Informed"
+    }
+  }
 }

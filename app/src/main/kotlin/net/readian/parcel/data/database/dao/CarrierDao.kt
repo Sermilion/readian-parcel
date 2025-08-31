@@ -9,12 +9,15 @@ import net.readian.parcel.data.database.entity.CarrierDataModel
 
 @Dao
 interface CarrierDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(carriers: List<CarrierDataModel>)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insertAll(carriers: List<CarrierDataModel>)
 
-    @Query("SELECT * FROM carriers")
-    fun observeAll(): Flow<List<CarrierDataModel>>
+  @Query("SELECT * FROM carriers")
+  fun observeAll(): Flow<List<CarrierDataModel>>
 
-    @Query("DELETE FROM carriers")
-    suspend fun clearAll()
+  @Query("SELECT * FROM carriers WHERE code = :code")
+  suspend fun getByCode(code: String): CarrierDataModel?
+
+  @Query("DELETE FROM carriers")
+  suspend fun clearAll()
 }

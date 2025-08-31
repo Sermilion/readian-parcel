@@ -8,25 +8,25 @@ import javax.inject.Singleton
 
 @Singleton
 class ApiKeyInterceptor @Inject constructor(
-    private val apiKeyRepository: ApiKeyRepository,
+  private val apiKeyRepository: ApiKeyRepository,
 ) : Interceptor {
 
-    @Suppress("MagicNumber")
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request()
+  @Suppress("MagicNumber")
+  override fun intercept(chain: Interceptor.Chain): Response {
+    val request = chain.request()
 
-        val apiKeyRaw = apiKeyRepository.getApiKey()
-        val apiKey = apiKeyRaw
-            ?.filter { it.code in 32..126 }
-            ?.trim()
+    val apiKeyRaw = apiKeyRepository.getApiKey()
+    val apiKey = apiKeyRaw
+      ?.filter { it.code in 32..126 }
+      ?.trim()
 
-        return if (!apiKey.isNullOrBlank()) {
-            val authenticatedRequest = request.newBuilder()
-                .addHeader("api-key", apiKey)
-                .build()
-            chain.proceed(authenticatedRequest)
-        } else {
-            chain.proceed(request)
-        }
+    return if (!apiKey.isNullOrBlank()) {
+      val authenticatedRequest = request.newBuilder()
+        .addHeader("api-key", apiKey)
+        .build()
+      chain.proceed(authenticatedRequest)
+    } else {
+      chain.proceed(request)
     }
+  }
 }

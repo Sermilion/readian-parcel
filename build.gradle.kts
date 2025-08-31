@@ -26,7 +26,11 @@ spotless {
 
 configure<com.diffplug.gradle.spotless.SpotlessExtensionPredeclare> {
   kotlin {
-    ktlint()
+    ktlint().editorConfigOverride(
+      mapOf(
+        "indent_size" to "2"
+      )
+    )
   }
 }
 
@@ -39,6 +43,7 @@ subprojects {
       targetExclude("bin/**/*.kt")
       ktlint().editorConfigOverride(
         mapOf(
+          "indent_size" to "2",
           "ij_kotlin_allow_trailing_comma" to true,
           "ij_kotlin_allow_trailing_comma_on_call_site" to true
         )
@@ -46,7 +51,11 @@ subprojects {
     }
     kotlinGradle {
       target("*.gradle.kts")
-      ktlint()
+      ktlint().editorConfigOverride(
+        mapOf(
+          "indent_size" to "2"
+        )
+      )
     }
   }
 

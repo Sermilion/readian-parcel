@@ -8,14 +8,14 @@ import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun HeaderText(
-    text: String,
-    modifier: Modifier = Modifier,
+  text: String,
+  modifier: Modifier = Modifier,
 ) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.headlineLarge.copy(
-            fontWeight = FontWeight.Bold,
-        ),
-        modifier = modifier,
-    )
+  Text(
+    text = text,
+    style = MaterialTheme.typography.headlineLarge.copy(
+      fontWeight = FontWeight.Bold,
+    ),
+    modifier = modifier,
+  )
 }

@@ -11,17 +11,17 @@ import net.readian.parcel.data.database.entity.DeliveryEventDataModel
 import net.readian.parcel.data.database.entity.PackageDataModel
 
 @Database(
-    entities = [PackageDataModel::class, DeliveryEventDataModel::class, CarrierDataModel::class],
-    version = ParcelDatabase.VERSION,
-    exportSchema = true,
+  entities = [PackageDataModel::class, DeliveryEventDataModel::class, CarrierDataModel::class],
+  version = ParcelDatabase.VERSION,
+  exportSchema = true,
 )
 @TypeConverters(Converters::class)
 abstract class ParcelDatabase : RoomDatabase() {
-    abstract fun packageDao(): PackageDao
-    abstract fun carrierDao(): CarrierDao
+  abstract fun packageDao(): PackageDao
+  abstract fun carrierDao(): CarrierDao
 
-    companion object {
-        const val DATABASE_NAME = "parcel_database"
-        const val VERSION = 1
-    }
+  companion object {
+    const val DATABASE_NAME = "parcel_database"
+    const val VERSION = 2
+  }
 }

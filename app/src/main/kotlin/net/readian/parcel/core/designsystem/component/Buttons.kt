@@ -13,25 +13,25 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun PrimaryButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+  text: String,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp)
-            .then(modifier),
-        // TODO: change to ReadianTheme
-        shape = MaterialTheme.shapes.extraSmall,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White,
-        ),
-    ) {
-        Text(
-            text = text,
-            // TODO: change to ReadianTheme
-        )
-    }
+  Button(
+    onClick = onClick,
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 32.dp)
+      .then(modifier),
+    // TODO: change to ReadianTheme
+    shape = MaterialTheme.shapes.extraSmall,
+    colors = ButtonDefaults.buttonColors(
+      containerColor = Color.White,
+    ),
+  ) {
+    Text(
+      text = text,
+      // TODO: change to ReadianTheme
+    )
+  }
 }
