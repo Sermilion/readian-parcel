@@ -17,29 +17,29 @@ import androidx.compose.ui.unit.dp
 
 @VisibleForTesting
 val LightDefaultColorScheme = lightColorScheme(
-    primary = Purple40,
-    onPrimary = Color.White,
-    primaryContainer = Purple90,
-    onPrimaryContainer = Purple10,
-    secondary = Orange40,
-    onSecondary = Color.White,
-    secondaryContainer = Orange90,
-    onSecondaryContainer = Orange10,
-    tertiary = Blue40,
-    onTertiary = Color.White,
-    tertiaryContainer = Blue90,
-    onTertiaryContainer = Blue10,
+    primary = ReadianBlue,
+    onPrimary = Light1,
+    primaryContainer = Light3,
+    onPrimaryContainer = ReadianBlueDark,
+    secondary = Light8,
+    onSecondary = Light1,
+    secondaryContainer = Light3,
+    onSecondaryContainer = Dark1,
+    tertiary = Light7,
+    onTertiary = Light1,
+    tertiaryContainer = Light3,
+    onTertiaryContainer = Dark1,
     error = Red40,
-    onError = Color.White,
+    onError = Light1,
     errorContainer = Red90,
     onErrorContainer = Red10,
-    background = DarkPurpleGray99,
-    onBackground = DarkPurpleGray10,
-    surface = DarkPurpleGray99,
-    onSurface = DarkPurpleGray10,
-    surfaceVariant = PurpleGray90,
-    onSurfaceVariant = PurpleGray30,
-    outline = PurpleGray50,
+    background = Light2,
+    onBackground = Dark2,
+    surface = Light1,
+    onSurface = Dark3,
+    surfaceVariant = Light4,
+    onSurfaceVariant = Dark4,
+    outline = Light6,
 )
 
 /**
@@ -47,29 +47,29 @@ val LightDefaultColorScheme = lightColorScheme(
  */
 @VisibleForTesting
 val DarkDefaultColorScheme = darkColorScheme(
-    primary = Purple80,
-    onPrimary = Purple20,
-    primaryContainer = Purple30,
-    onPrimaryContainer = Purple90,
-    secondary = Orange80,
-    onSecondary = Orange20,
-    secondaryContainer = Orange30,
-    onSecondaryContainer = Orange90,
-    tertiary = Blue80,
-    onTertiary = Blue20,
-    tertiaryContainer = Blue30,
-    onTertiaryContainer = Blue90,
+    primary = ReadianBlue,
+    onPrimary = Dark1,
+    primaryContainer = ReadianBlueDark,
+    onPrimaryContainer = Light1,
+    secondary = Dark7,
+    onSecondary = Dark1,
+    secondaryContainer = Dark5,
+    onSecondaryContainer = Light1,
+    tertiary = Dark7,
+    onTertiary = Dark1,
+    tertiaryContainer = Dark4,
+    onTertiaryContainer = Light1,
     error = Red80,
     onError = Red20,
     errorContainer = Red30,
     onErrorContainer = Red90,
-    background = DarkPurpleGray10,
-    onBackground = DarkPurpleGray90,
-    surface = DarkPurpleGray10,
-    onSurface = DarkPurpleGray90,
-    surfaceVariant = PurpleGray30,
-    onSurfaceVariant = PurpleGray80,
-    outline = PurpleGray60,
+    background = Dark2,
+    onBackground = Light1,
+    surface = Dark3,
+    onSurface = Light1,
+    surfaceVariant = Dark6,
+    onSurfaceVariant = Dark7,
+    outline = Dark6,
 )
 
 /**
@@ -133,10 +133,10 @@ val DarkAndroidColorScheme = darkColorScheme(
 )
 
 val LightDefaultGradientColors = GradientColors(
-    primary = Purple95,
-    secondary = Orange95,
-    tertiary = Blue95,
-    neutral = DarkPurpleGray95,
+    primary = ReadianBlue,
+    secondary = ReadianBlueDisabled,
+    tertiary = Light4,
+    neutral = Light3,
 )
 
 val LightAndroidBackgroundTheme =
@@ -168,8 +168,8 @@ fun StarterAppTheme(
     }
 
     val defaultBackgroundTheme = BackgroundTheme(
-        color = colorScheme.surface,
-        tonalElevation = 2.dp,
+        color = colorScheme.background,
+        tonalElevation = 0.dp,
     )
     val backgroundTheme = when {
         dynamicColor -> defaultBackgroundTheme

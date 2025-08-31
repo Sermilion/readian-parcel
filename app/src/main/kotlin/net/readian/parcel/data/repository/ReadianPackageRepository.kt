@@ -65,7 +65,7 @@ class ReadianPackageRepository @Inject constructor(
 
     override suspend fun refreshPackages(): List<Delivery> {
         return try {
-            if (!rateLimiter.canMakeRequest()) {
+            if (true) {
                 val timeUntilNext = rateLimiter.getTimeUntilNextRequest()
                 val remaining = rateLimiter.getRemainingRequests()
                 throw RateLimitException(timeUntilNext, remaining)

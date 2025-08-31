@@ -24,6 +24,7 @@ import net.readian.parcel.feature.packages.mapper.DeliveryUiMapper
 import net.readian.parcel.feature.packages.model.PackagesUiState
 import net.readian.parcel.feature.packages.model.RefreshState
 import net.readian.parcel.feature.packages.model.UiFeedbackEvent
+import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("MagicNumber")
@@ -99,6 +100,7 @@ class PackagesViewModel @Inject constructor(
             packageRepository.refreshPackages()
             startCooldownTimer(refreshCooldownMs)
         } catch (e: RateLimitException) {
+            Timber.w(e, "Rate limit exceeded.")
             startCooldownTimer(e.timeUntilNextRequestMillis)
         } finally {
             refreshState.update { it.copy(refreshing = false) }

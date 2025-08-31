@@ -2,6 +2,7 @@ package net.readian.parcel.feature.packagedetail
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,12 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,15 +27,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -43,9 +43,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.readian.parcel.R
 import net.readian.parcel.core.common.TimeUtils
+import net.readian.parcel.core.designsystem.component.DeliveryStatusChip
 import net.readian.parcel.feature.packages.model.DeliveryEventUiModel
 import net.readian.parcel.feature.packages.model.DeliveryUiModel
-import net.readian.parcel.feature.packages.model.StatusColor
 
 @Composable
 fun PackageDetailScreen(
@@ -90,7 +90,7 @@ fun PackageDetailContent(
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = host) },
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { Text(stringResource(id = R.string.packages_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -168,7 +168,9 @@ private fun HeaderCard(delivery: DeliveryUiModel) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -208,17 +210,11 @@ private fun TimelineAndStatus(delivery: DeliveryUiModel) {
             modifier = Modifier.padding(top = 8.dp),
         )
     }
-    Surface(
-        color = statusColorToColor(delivery.statusColor),
-        shape = MaterialTheme.shapes.small,
+    DeliveryStatusChip(
+        textRes = delivery.statusTextRes,
+        statusColor = delivery.statusColor,
         modifier = Modifier.padding(top = 12.dp),
-    ) {
-        Text(
-            text = stringResource(id = delivery.statusTextRes),
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        )
-    }
+    )
 }
 
 @Suppress("CyclomaticComplexMethod")
@@ -262,7 +258,15 @@ private fun EventsSection(delivery: DeliveryUiModel) {
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(sorted, key = { "${it.timestamp ?: 0}_${it.description}" }) { event ->
+            itemsIndexed(
+                items = sorted,
+                key = { index, event ->
+                    "${event.timestamp ?: -1}" +
+                        "_${event.description}" +
+                        "_${event.location ?: ""}" +
+                        "_${event.rawDate ?: ""}_$index"
+                },
+            ) { _, event ->
                 EventRow(event)
             }
         }
@@ -274,6 +278,8 @@ private fun EventRow(event: DeliveryEventUiModel) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
@@ -300,14 +306,7 @@ private fun EventRow(event: DeliveryEventUiModel) {
     }
 }
 
-@Composable
-private fun statusColorToColor(statusColor: StatusColor): Color = when (statusColor) {
-    StatusColor.SUCCESS -> MaterialTheme.colorScheme.primaryContainer
-    StatusColor.INFO -> MaterialTheme.colorScheme.secondary
-    StatusColor.WARNING -> MaterialTheme.colorScheme.outline
-    StatusColor.ERROR -> MaterialTheme.colorScheme.errorContainer
-    StatusColor.NEUTRAL -> MaterialTheme.colorScheme.surfaceVariant
-}
+// Icon mapping is centralized in DeliveryStatusChip
 
 private fun handleSharing(
     delivery: DeliveryUiModel,

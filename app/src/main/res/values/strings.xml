@@ -15,6 +15,8 @@
     <!-- Packages screen -->
     <string name="packages_title">My Packages</string>
     <string name="refresh">Refresh</string>
+    <string name="search_hint">Search %1$s</string>
+    <string name="filter_all">All</string>
     <string name="no_packages_found">No packages found</string>
     <string name="carrier_label">Carrier: %1$s</string>
     <string name="retry">Retry</string>
