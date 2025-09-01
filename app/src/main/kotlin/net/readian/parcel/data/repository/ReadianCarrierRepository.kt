@@ -3,9 +3,12 @@ package net.readian.parcel.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
+import net.readian.parcel.core.common.DispatcherProvider
 import net.readian.parcel.data.api.CarriersApiService
 import net.readian.parcel.data.database.dao.CarrierDao
 import net.readian.parcel.data.database.entity.CarrierDataModel
+import net.readian.parcel.domain.model.Carrier
 import net.readian.parcel.domain.repository.CarrierRepository
 import retrofit2.HttpException
 import timber.log.Timber
@@ -17,6 +20,7 @@ import javax.inject.Singleton
 class ReadianCarrierRepository @Inject constructor(
   private val api: CarriersApiService,
   private val carrierDao: CarrierDao,
+  private val dispatcherProvider: DispatcherProvider,
 ) : CarrierRepository {
 
   override val carriers: Flow<Map<String, String>> = carrierDao
@@ -24,7 +28,7 @@ class ReadianCarrierRepository @Inject constructor(
     .map { list -> list.associate { it.code to it.name } }
     .distinctUntilChanged()
 
-  override suspend fun refresh() {
+  override suspend fun refresh() = withContext(dispatcherProvider.io()) {
     try {
       val map = api.getSupportedCarriers()
       val now = System.currentTimeMillis()
@@ -39,7 +43,9 @@ class ReadianCarrierRepository @Inject constructor(
     }
   }
 
-  override suspend fun getCarrier(code: String): CarrierDataModel? {
-    return carrierDao.getByCode(code)
+  override suspend fun getCarrier(code: String): Carrier? = withContext(dispatcherProvider.io()) {
+    carrierDao.getByCode(code)?.toDomain()
   }
 }
+
+private fun CarrierDataModel.toDomain(): Carrier = Carrier(code = code, name = name)

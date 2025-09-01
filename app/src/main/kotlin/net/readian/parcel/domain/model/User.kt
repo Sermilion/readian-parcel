@@ -1,5 +1,5 @@
 package net.readian.parcel.domain.model
 
-data class UserDataModel(
+data class User(
   val isLoggedIn: Boolean = false,
 )

@@ -11,6 +11,4 @@ data object LoginDestination : ParcelDestination
 data object PackagesDestination : ParcelDestination
 
 @Serializable
-data class PackageDetailDestination(
-  val packageId: String,
-) : ParcelDestination
+data class PackageDetailDestination(val packageId: String) : ParcelDestination

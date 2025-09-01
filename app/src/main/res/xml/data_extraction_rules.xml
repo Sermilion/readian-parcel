@@ -4,16 +4,21 @@
    for details.
 -->
 <data-extraction-rules>
+    <!-- Harden cloud backup (API 31+) -->
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <!-- EncryptedSharedPreferences holding API key -->
+        <exclude domain="sharedpref" path="parcel_api_prefs.xml" />
+        <!-- Room database (large/device-bound) -->
+        <exclude domain="database" path="parcel_database" />
+        <!-- DataStore files -->
+        <exclude domain="file" path="datastore/user_data.pb" />
+        <exclude domain="file" path="datastore/parcel_prefs.preferences_pb" />
     </cloud-backup>
-    <!--
+    <!-- Also exclude from device-to-device transfer -->
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="sharedpref" path="parcel_api_prefs.xml" />
+        <exclude domain="database" path="parcel_database" />
+        <exclude domain="file" path="datastore/user_data.pb" />
+        <exclude domain="file" path="datastore/parcel_prefs.preferences_pb" />
     </device-transfer>
-    -->
 </data-extraction-rules>

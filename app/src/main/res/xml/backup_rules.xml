@@ -6,8 +6,12 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <!-- Exclude sensitive data and large caches from legacy Auto Backup (API < 31) -->
+    <!-- EncryptedSharedPreferences holding API key -->
+    <exclude domain="sharedpref" path="parcel_api_prefs.xml" />
+    <!-- Room database (can be large and device-bound); prefer server as source of truth -->
+    <exclude domain="database" path="parcel_database" />
+    <!-- Proto & Preferences DataStore files (App files/datastore) -->
+    <exclude domain="file" path="datastore/user_data.pb" />
+    <exclude domain="file" path="datastore/parcel_prefs.preferences_pb" />
 </full-backup-content>

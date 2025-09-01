@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.readian.parcel.data.proto.UserDataOuterClass.UserData
 import net.readian.parcel.domain.datastore.UserDataStore
-import net.readian.parcel.domain.model.UserDataModel
+import net.readian.parcel.domain.model.User
 import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
@@ -18,8 +18,8 @@ import javax.inject.Singleton
 class ReadianUserDataStore @Inject constructor(
   private val dataStore: DataStore<UserData>,
 ) : UserDataStore {
-  override val userData: Flow<UserDataModel> = dataStore.data.map { protoData ->
-    UserDataModel(
+  override val userData: Flow<User> = dataStore.data.map { protoData ->
+    User(
       isLoggedIn = protoData.isLoggedIn,
     )
   }

@@ -14,4 +14,8 @@ object LoginContract {
     data object InvalidKey : LoginError
     data object Network : LoginError
   }
+
+  sealed interface UiEvent {
+    data object NavigateToPackages : UiEvent
+  }
 }

@@ -14,12 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import net.readian.parcel.feature.packages.model.StatusColor
+import net.readian.parcel.core.ui.delivery.model.StatusColorUiModel
 
 @Composable
 fun DeliveryStatusChip(
   @StringRes textRes: Int,
-  statusColor: StatusColor,
+  statusColor: StatusColorUiModel,
   modifier: Modifier = Modifier,
 ) {
   AssistChip(
@@ -38,10 +38,10 @@ fun DeliveryStatusChip(
   )
 }
 
-fun statusIconFor(statusColor: StatusColor): ImageVector = when (statusColor) {
-  StatusColor.SUCCESS -> Icons.Outlined.CheckCircle
-  StatusColor.INFO -> Icons.Outlined.LocalShipping
-  StatusColor.WARNING -> Icons.Outlined.ErrorOutline
-  StatusColor.ERROR -> Icons.Outlined.ErrorOutline
-  StatusColor.NEUTRAL -> Icons.Outlined.LocalShipping
+fun statusIconFor(statusColor: StatusColorUiModel): ImageVector = when (statusColor) {
+  StatusColorUiModel.SUCCESS -> Icons.Outlined.CheckCircle
+  StatusColorUiModel.INFO -> Icons.Outlined.LocalShipping
+  StatusColorUiModel.WARNING -> Icons.Outlined.ErrorOutline
+  StatusColorUiModel.ERROR -> Icons.Outlined.ErrorOutline
+  StatusColorUiModel.NEUTRAL -> Icons.Outlined.LocalShipping
 }

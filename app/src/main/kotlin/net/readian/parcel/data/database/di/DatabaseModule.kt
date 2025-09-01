@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import net.readian.parcel.BuildConfig
 import net.readian.parcel.data.database.ParcelDatabase
 import net.readian.parcel.data.database.dao.CarrierDao
 import net.readian.parcel.data.database.dao.PackageDao
@@ -22,11 +23,15 @@ object DatabaseModule {
   fun provideParcelDatabase(
     @ApplicationContext context: Context,
   ): ParcelDatabase {
-    return Room.databaseBuilder(
+    val builder = Room.databaseBuilder(
       context,
       ParcelDatabase::class.java,
       ParcelDatabase.Companion.DATABASE_NAME,
-    ).fallbackToDestructiveMigration().build()
+    )
+    if (BuildConfig.DEBUG) {
+      builder.fallbackToDestructiveMigration()
+    }
+    return builder.build()
   }
 
   @Provides

@@ -49,10 +49,17 @@ fun LoginScreen(
   viewModel: LoginViewModel,
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  LaunchedEffect(Unit) {
+    viewModel.uiEvents.collect { event ->
+      when (event) {
+        LoginContract.UiEvent.NavigateToPackages -> onLoginSuccess()
+      }
+    }
+  }
   LoginContent(
     state = uiState,
     onApiKeyChange = viewModel::onApiKeyChanged,
-    onSubmit = { viewModel.validateAndSaveApiKey(onLoginSuccess) },
+    onSubmit = { viewModel.validateAndSaveApiKey() },
   )
 }
 

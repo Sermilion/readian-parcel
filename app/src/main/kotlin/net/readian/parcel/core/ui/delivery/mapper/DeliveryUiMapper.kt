@@ -1,17 +1,13 @@
-package net.readian.parcel.feature.packages.mapper
+package net.readian.parcel.core.ui.delivery.mapper
 
 import net.readian.parcel.R
+import net.readian.parcel.core.ui.delivery.model.DeliveryEventUiModel
+import net.readian.parcel.core.ui.delivery.model.DeliveryUiModel
+import net.readian.parcel.core.ui.delivery.model.StatusColorUiModel
 import net.readian.parcel.domain.model.Delivery
 import net.readian.parcel.domain.model.DeliveryEvent
 import net.readian.parcel.domain.model.DeliveryStatus
-import net.readian.parcel.feature.packages.model.DeliveryEventUiModel
-import net.readian.parcel.feature.packages.model.DeliveryUiModel
-import net.readian.parcel.feature.packages.model.StatusColor
 
-/**
- * Maps domain models to presentation/UI models
- * This is where UI-specific logic and formatting happens
- */
 object DeliveryUiMapper {
 
   fun toUiModel(domain: Delivery, carrierName: String? = null): DeliveryUiModel {
@@ -54,14 +50,14 @@ object DeliveryUiMapper {
     }
   }
 
-  private fun getStatusColor(status: DeliveryStatus): StatusColor {
+  private fun getStatusColor(status: DeliveryStatus): StatusColorUiModel {
     return when (status) {
-      DeliveryStatus.COMPLETED -> StatusColor.SUCCESS
-      DeliveryStatus.OUT_FOR_DELIVERY -> StatusColor.INFO
-      DeliveryStatus.IN_TRANSIT -> StatusColor.INFO
-      DeliveryStatus.EXPECTING_PICKUP -> StatusColor.WARNING
-      DeliveryStatus.FAILED_DELIVERY, DeliveryStatus.EXCEPTION -> StatusColor.ERROR
-      else -> StatusColor.NEUTRAL
+      DeliveryStatus.COMPLETED -> StatusColorUiModel.SUCCESS
+      DeliveryStatus.OUT_FOR_DELIVERY -> StatusColorUiModel.INFO
+      DeliveryStatus.IN_TRANSIT -> StatusColorUiModel.INFO
+      DeliveryStatus.EXPECTING_PICKUP -> StatusColorUiModel.WARNING
+      DeliveryStatus.FAILED_DELIVERY, DeliveryStatus.EXCEPTION -> StatusColorUiModel.ERROR
+      else -> StatusColorUiModel.NEUTRAL
     }
   }
 }

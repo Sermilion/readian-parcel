@@ -2,7 +2,7 @@ package net.readian.parcel.feature.packages
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -32,7 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -47,18 +46,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import net.readian.parcel.R
 import net.readian.parcel.core.designsystem.component.DeliveryStatusChip
-import net.readian.parcel.core.designsystem.component.PullToRefreshContent
-import net.readian.parcel.feature.packages.model.DeliveryUiModel
-import net.readian.parcel.feature.packages.model.PackagesUiState
-import net.readian.parcel.feature.packages.model.UiFeedbackEvent
-import net.readian.parcel.feature.packages.model.isRefreshing
-import net.readian.parcel.feature.packages.model.refreshAllowed
+import net.readian.parcel.core.designsystem.component.ErrorBanner
+import net.readian.parcel.core.designsystem.component.button.RefreshButton
+import net.readian.parcel.core.designsystem.component.dialog.RateLimitDialog
+import net.readian.parcel.core.ui.delivery.model.DeliveryUiModel
+import net.readian.parcel.feature.packages.PackagesContract.PackagesUiState
+import net.readian.parcel.feature.packages.PackagesContract.UiFeedbackEvent
 
 @Composable
 fun PackagesScreen(
@@ -68,23 +68,10 @@ fun PackagesScreen(
   modifier: Modifier = Modifier,
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-  val snackBarHostState = remember { SnackbarHostState() }
-  var currentErrorType by remember { mutableStateOf<UiFeedbackEvent.Error?>(null) }
 
   LaunchedEffect(Unit) {
     viewModel.uiFeedbackEvents.collect { event ->
-      when (event) {
-        is UiFeedbackEvent.NavigateToLogin -> onLogout()
-        is UiFeedbackEvent.Error -> currentErrorType = event
-      }
-    }
-  }
-
-  val errorMessage = currentErrorType?.let { getFeedbackMessage(it) }
-
-  LaunchedEffect(snackBarHostState, errorMessage) {
-    if (errorMessage != null) {
-      snackBarHostState.showSnackbar(message = errorMessage, duration = SnackbarDuration.Short)
+      if (event is UiFeedbackEvent.NavigateToLogin) onLogout()
     }
   }
 
@@ -93,7 +80,7 @@ fun PackagesScreen(
     onPackageClick = onPackageClick,
     onLogout = { viewModel.logout() },
     onRefresh = { viewModel.refreshPackages() },
-    onShowRateLimit = { viewModel.showRateLimitMessage() },
+    onDismissError = { viewModel.onDismissError() },
     modifier = modifier,
   )
 }
@@ -105,18 +92,23 @@ fun PackagesScreen(
   onPackageClick: (String) -> Unit,
   onLogout: () -> Unit,
   onRefresh: () -> Unit,
-  onShowRateLimit: () -> Unit,
+  onDismissError: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val snackBarHostState = remember { SnackbarHostState() }
   var query by remember { mutableStateOf("") }
   var filter by remember { mutableStateOf(StatusFilter.ALL) }
+  var showRateLimitDialog by remember { mutableStateOf(false) }
   Scaffold(
     modifier = Modifier,
     snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
     topBar = {
       PackagesTopBar(
         onLogout = onLogout,
+        onRefresh = onRefresh,
+        canRefresh = state.refreshAllowed,
+        isRefreshing = state.isRefreshing,
+        onShowRateLimit = { showRateLimitDialog = true },
       )
     },
   ) { paddingValues ->
@@ -135,28 +127,50 @@ fun PackagesScreen(
         onFilterChange = { filter = it },
       )
 
-      PullToRefreshContent(
-        onRefresh = { if (state.refreshAllowed) onRefresh() else onShowRateLimit() },
-        refreshing = state.isRefreshing,
-        modifier = Modifier.fillMaxSize(),
-      ) {
-        PackagesListSection(
-          state = state,
-          query = query,
-          filter = filter,
-          onPackageClick = onPackageClick,
+      if (state is PackagesUiState.Content && state.lastRefreshError != null) {
+        ErrorBanner(
+          message = state.lastRefreshError,
+          hasOfflineData = state.hasOfflineData,
+          onDismiss = onDismissError,
         )
       }
+
+      PackagesListSection(
+        state = state,
+        query = query,
+        filter = filter,
+        onPackageClick = onPackageClick,
+        modifier = Modifier.fillMaxSize(),
+      )
+    }
+
+    if (showRateLimitDialog) {
+      RateLimitDialog(
+        onDismiss = { showRateLimitDialog = false },
+        remainingMinutes = (state as? PackagesUiState.Content)?.cooldownMinutes,
+      )
     }
   }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PackagesTopBar(onLogout: () -> Unit) {
+private fun PackagesTopBar(
+  onLogout: () -> Unit,
+  onRefresh: () -> Unit,
+  canRefresh: Boolean,
+  isRefreshing: Boolean,
+  onShowRateLimit: () -> Unit,
+) {
   TopAppBar(
     title = { Text(stringResource(id = R.string.packages_title)) },
     actions = {
+      RefreshButton(
+        onRefresh = onRefresh,
+        canRefresh = canRefresh,
+        isRefreshing = isRefreshing,
+        onShowRateLimit = onShowRateLimit,
+      )
       IconButton(onClick = onLogout) {
         Icon(
           Icons.AutoMirrored.Outlined.Logout,
@@ -199,7 +213,10 @@ private fun ModernSearchBar(
         trailingIcon = {
           if (query.isNotEmpty()) {
             IconButton(onClick = { onQueryChange("") }) {
-              Icon(Icons.Outlined.Close, contentDescription = null)
+              Icon(
+                Icons.Outlined.Close,
+                contentDescription = stringResource(id = R.string.clear_search),
+              )
             }
           }
         },
@@ -244,60 +261,66 @@ private fun FiltersRow(
 }
 
 @Composable
-private fun BoxScope.PackagesListSection(
+private fun PackagesListSection(
   state: PackagesUiState,
   query: String,
   filter: StatusFilter,
   onPackageClick: (String) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-  when (state) {
-    is PackagesUiState.Loading -> {
-      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-    }
+  Box(modifier = modifier) {
+    when (state) {
+      is PackagesUiState.Loading -> {
+        CircularProgressIndicator(
+          modifier = Modifier.align(Alignment.Center).testTag("packages_loading"),
+        )
+      }
 
-    is PackagesUiState.Content -> {
-      val filtered = state.packages
-        .filter { ui ->
-          val matchesQuery = query.isBlank() ||
-            ui.description.contains(query, ignoreCase = true) ||
-            ui.trackingNumber.contains(query, ignoreCase = true) ||
-            (ui.carrierName ?: ui.carrierCode).contains(query, ignoreCase = true)
-          val isDelivered = ui.statusTextRes == R.string.delivery_status_completed
-          val matchesFilter = when (filter) {
-            StatusFilter.ALL -> true
-            StatusFilter.ACTIVE -> !isDelivered
-            StatusFilter.DELIVERED -> isDelivered
+      is PackagesUiState.Content -> {
+        val filtered = remember(state, query, filter) {
+          state.packages.filter { ui ->
+            val matchesQuery = query.isBlank() ||
+              ui.description.contains(query, ignoreCase = true) ||
+              ui.trackingNumber.contains(query, ignoreCase = true) ||
+              (ui.carrierName ?: ui.carrierCode).contains(query, ignoreCase = true)
+            val isDelivered = ui.statusTextRes == R.string.delivery_status_completed
+            val matchesFilter = when (filter) {
+              StatusFilter.ALL -> true
+              StatusFilter.ACTIVE -> !isDelivered
+              StatusFilter.DELIVERED -> isDelivered
+            }
+            matchesQuery && matchesFilter
           }
-          matchesQuery && matchesFilter
         }
 
-      if (filtered.isEmpty()) {
-        Column(
-          modifier = Modifier.align(Alignment.Center),
-          horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.LocalShipping,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-          )
-          Spacer(modifier = Modifier.height(8.dp))
-          Text(
-            text = stringResource(id = R.string.no_packages_found),
-            style = MaterialTheme.typography.bodyLarge,
-          )
-        }
-      } else {
-        LazyColumn(
-          modifier = Modifier.fillMaxSize(),
-          contentPadding = PaddingValues(16.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          items(filtered, key = { it.trackingNumber }) { deliveryUi ->
-            PackageCard(
-              deliveryUi = deliveryUi,
-              onClick = { onPackageClick(deliveryUi.trackingNumber) },
+        if (filtered.isEmpty()) {
+          Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally,
+          ) {
+            Icon(
+              imageVector = Icons.Outlined.LocalShipping,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+              text = stringResource(id = R.string.no_packages_found),
+              style = MaterialTheme.typography.bodyLarge,
+            )
+          }
+        } else {
+          LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            items(filtered, key = { it.trackingNumber }) { deliveryUi ->
+              PackageCard(
+                deliveryUi = deliveryUi,
+                onClick = { onPackageClick(deliveryUi.trackingNumber) },
+              )
+            }
           }
         }
       }
@@ -362,7 +385,7 @@ private fun PackageCard(
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-              text = " • ",
+              text = stringResource(id = R.string.separator_bullet),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -389,18 +412,6 @@ private fun PackageCard(
         modifier = Modifier.padding(top = 12.dp),
       )
     }
-  }
-}
-
-@Composable
-private fun getFeedbackMessage(event: UiFeedbackEvent.Error): String {
-  return when (event) {
-    is UiFeedbackEvent.Error.RateLimit -> stringResource(
-      id = R.string.error_rate_limit_with_time,
-      event.remainingMinutes,
-    )
-
-    is UiFeedbackEvent.Error.RateLimitGeneral -> stringResource(id = R.string.error_rate_limit_general)
   }
 }
 

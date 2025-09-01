@@ -145,6 +145,48 @@ val DarkAndroidBackgroundTheme =
   BackgroundTheme(color = Color.Black)
 
 @Composable
+fun ReadianTheme(
+  darkTheme: Boolean = isSystemInDarkTheme(),
+  dynamicColor: Boolean = false,
+  content: @Composable () -> Unit,
+) {
+  val colorScheme = getColorScheme(dynamicColor, darkTheme, androidTheme = false)
+
+  val defaultGradientColors = GradientColors()
+  val gradientColors = when {
+    dynamicColor -> {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        defaultGradientColors
+      } else {
+        if (darkTheme) defaultGradientColors else LightDefaultGradientColors
+      }
+    }
+
+    else -> if (darkTheme) defaultGradientColors else LightDefaultGradientColors
+  }
+
+  val defaultBackgroundTheme = BackgroundTheme(
+    color = colorScheme.surface,
+    tonalElevation = 2.dp,
+  )
+  val backgroundTheme = when {
+    dynamicColor -> defaultBackgroundTheme
+    else -> defaultBackgroundTheme
+  }
+
+  CompositionLocalProvider(
+    LocalGradientColors provides gradientColors,
+    LocalBackgroundTheme provides backgroundTheme,
+  ) {
+    MaterialTheme(
+      colorScheme = colorScheme,
+      typography = ReadianTypography,
+      content = content,
+    )
+  }
+}
+
+@Composable
 fun StarterAppTheme(
   darkTheme: Boolean = isSystemInDarkTheme(),
   dynamicColor: Boolean = false,

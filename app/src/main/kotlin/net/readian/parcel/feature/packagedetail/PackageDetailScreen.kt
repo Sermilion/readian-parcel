@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
@@ -30,12 +30,15 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,8 +47,12 @@ import kotlinx.coroutines.launch
 import net.readian.parcel.R
 import net.readian.parcel.core.common.TimeUtils
 import net.readian.parcel.core.designsystem.component.DeliveryStatusChip
-import net.readian.parcel.feature.packages.model.DeliveryEventUiModel
-import net.readian.parcel.feature.packages.model.DeliveryUiModel
+import net.readian.parcel.core.designsystem.component.ErrorBanner
+import net.readian.parcel.core.designsystem.component.button.RefreshButton
+import net.readian.parcel.core.designsystem.component.dialog.RateLimitDialog
+import net.readian.parcel.core.ui.delivery.model.DeliveryEventUiModel
+import net.readian.parcel.core.ui.delivery.model.DeliveryUiModel
+import net.readian.parcel.feature.packagedetail.PackageDetailContract.UiState
 
 @Composable
 fun PackageDetailScreen(
@@ -60,56 +67,71 @@ fun PackageDetailScreen(
 
   PackageDetailContent(
     state = state,
-    onNavigateBack = onNavigateBack,
-    onCopyTracking = { tracking ->
-      clipboard.setText(androidx.compose.ui.text.AnnotatedString(tracking))
-      scope.launch { snackBarHostState.showSnackbar(context.getString(R.string.copied_to_clipboard)) }
-    },
-    onShare = { delivery ->
-      handleSharing(
-        delivery = delivery,
-        context = context,
-        scope = scope,
-        snackBarHostState = snackBarHostState,
-      )
+    actions = object : PackageDetailActions {
+      override fun onNavigateBack() = onNavigateBack()
+
+      override fun onRefresh() = viewModel.refreshPackage()
+
+      override fun onDismissError() = viewModel.onDismissError()
+
+      override fun onCopyTracking(tracking: String) {
+        clipboard.setText(AnnotatedString(tracking))
+        scope.launch { snackBarHostState.showSnackbar(context.getString(R.string.copied_to_clipboard)) }
+      }
+
+      override fun onShare(model: DeliveryUiModel) {
+        handleSharing(
+          delivery = model,
+          context = context,
+          scope = scope,
+          snackBarHostState = snackBarHostState,
+        )
+      }
     },
     snackBarHostState = snackBarHostState,
   )
 }
 
 @Composable
-fun PackageDetailContent(
+private fun PackageDetailContent(
   state: UiState,
-  onNavigateBack: () -> Unit,
-  onCopyTracking: (String) -> Unit,
-  onShare: (DeliveryUiModel) -> Unit,
+  actions: PackageDetailActions,
   modifier: Modifier = Modifier,
   snackBarHostState: SnackbarHostState? = null,
 ) {
   val host = snackBarHostState ?: remember { SnackbarHostState() }
+  var showRateLimitDialog by remember { mutableStateOf(false) }
+
   Scaffold(
     snackbarHost = { SnackbarHost(hostState = host) },
+    modifier = modifier,
     topBar = {
       CenterAlignedTopAppBar(
         title = { Text(stringResource(id = R.string.packages_title)) },
         navigationIcon = {
-          IconButton(onClick = onNavigateBack) {
+          IconButton(onClick = actions::onNavigateBack) {
             Icon(
-              Icons.Default.ArrowBack,
+              Icons.AutoMirrored.Default.ArrowBack,
               contentDescription = stringResource(id = android.R.string.cancel),
             )
           }
         },
         actions = {
           if (state is UiState.Data) {
+            RefreshButton(
+              onRefresh = actions::onRefresh,
+              canRefresh = state.canRefresh,
+              isRefreshing = state.refreshing,
+              onShowRateLimit = { showRateLimitDialog = true },
+            )
             val delivery = state.delivery
-            IconButton(onClick = { onCopyTracking(delivery.trackingNumber) }) {
+            IconButton(onClick = { actions.onCopyTracking(delivery.trackingNumber) }) {
               Icon(
                 Icons.Default.ContentCopy,
                 contentDescription = stringResource(id = R.string.copy),
               )
             }
-            IconButton(onClick = { onShare(delivery) }) {
+            IconButton(onClick = { actions.onShare(delivery) }) {
               Icon(Icons.Default.Share, contentDescription = stringResource(id = R.string.share))
             }
           }
@@ -117,37 +139,49 @@ fun PackageDetailContent(
       )
     },
   ) { innerPadding ->
-    when (state) {
-      is UiState.Loading -> {
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding),
-        ) {
+    Box(modifier = Modifier.padding(innerPadding)) {
+      when (state) {
+        is UiState.Loading -> Box(modifier = Modifier.fillMaxSize()) {
           CircularProgressIndicator(modifier = Modifier.padding(24.dp))
         }
-      }
 
-      is UiState.NotFound -> {
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding),
-        ) {
-          Text(
-            text = stringResource(id = R.string.no_packages_found),
-            modifier = Modifier.padding(24.dp),
-          )
+        is UiState.NotFound -> NotFoundContent()
+
+        is UiState.Data -> {
+          Column {
+            if (state.lastRefreshError != null) {
+              ErrorBanner(
+                message = state.lastRefreshError,
+                hasOfflineData = state.hasOfflineData,
+                onDismiss = actions::onDismissError,
+              )
+            }
+
+            PackageDetailBody(
+              delivery = state.delivery,
+              modifier = Modifier.fillMaxSize(),
+            )
+          }
         }
       }
-
-      is UiState.Data -> {
-        PackageDetailBody(
-          delivery = state.delivery,
-          modifier = modifier.padding(innerPadding),
-        )
-      }
     }
+
+    if (showRateLimitDialog) {
+      RateLimitDialog(
+        onDismiss = { showRateLimitDialog = false },
+        remainingMinutes = (state as? UiState.Data)?.cooldownMinutes,
+      )
+    }
+  }
+}
+
+@Composable
+private fun NotFoundContent() {
+  Box(modifier = Modifier.fillMaxSize()) {
+    Text(
+      text = stringResource(id = R.string.no_packages_found),
+      modifier = Modifier.padding(24.dp),
+    )
   }
 }
 
@@ -306,15 +340,14 @@ private fun EventRow(event: DeliveryEventUiModel) {
   }
 }
 
-// Icon mapping is centralized in DeliveryStatusChip
-
 private fun handleSharing(
   delivery: DeliveryUiModel,
   context: Context,
   scope: CoroutineScope,
   snackBarHostState: SnackbarHostState,
 ) {
-  val shareText = "${delivery.description}\n${delivery.carrierCode} • ${delivery.trackingNumber}"
+  val pair = context.getString(R.string.share_carrier_and_tracking, delivery.carrierCode, delivery.trackingNumber)
+  val shareText = "${delivery.description}\n$pair"
   val intent = Intent(Intent.ACTION_SEND).apply {
     type = "text/plain"
     putExtra(Intent.EXTRA_TEXT, shareText)
@@ -326,4 +359,12 @@ private fun handleSharing(
   }.onFailure {
     scope.launch { snackBarHostState.showSnackbar(context.getString(R.string.share_failed)) }
   }
+}
+
+private interface PackageDetailActions {
+  fun onNavigateBack()
+  fun onRefresh()
+  fun onDismissError()
+  fun onCopyTracking(tracking: String)
+  fun onShare(model: DeliveryUiModel)
 }

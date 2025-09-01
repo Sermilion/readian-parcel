@@ -29,6 +29,12 @@ android {
     vectorDrawables {
       useSupportLibrary = true
     }
+
+    val apiBaseUrl = localProperties.getProperty("api.baseUrl", "https://api.parcel.app/")
+    buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+    buildFeatures {
+      buildConfig = true
+    }
   }
 
   buildTypes {
@@ -87,6 +93,7 @@ dependencies {
   androidTestImplementation(kotlin("test"))
   androidTestImplementation(libs.junit)
   androidTestImplementation(libs.androidx.compose.ui.test)
+  debugImplementation(libs.androidx.compose.ui.testManifest)
 
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.appcompat)
@@ -129,10 +136,7 @@ dependencies {
   // JSON serialization
   implementation(libs.kotlinx.serialization.json)
 
-  // WorkManager for background sync
-  implementation(libs.androidx.work.ktx)
-  implementation(libs.hilt.ext.work)
-  ksp(libs.hilt.ext.compiler)
+  // WorkManager not used currently; removed to reduce footprint
 
   // Chucker for network debugging
   debugImplementation("com.github.chuckerteam.chucker:library:4.0.0")
@@ -141,8 +145,8 @@ dependencies {
   // Core functions
   testImplementation(libs.androidx.navigation.testing)
   testImplementation(libs.accompanist.testharness)
-  testImplementation(libs.work.testing)
   testImplementation(kotlin("test"))
   testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation("io.mockk:mockk:1.13.10")
   // androidx.test:core not needed for pure JVM unit tests here
 }

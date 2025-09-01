@@ -6,17 +6,21 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import net.readian.parcel.core.common.ratelimit.RefreshManager
 import net.readian.parcel.core.navigation.PackageDetailDestination
+import net.readian.parcel.core.ui.delivery.mapper.DeliveryUiMapper
 import net.readian.parcel.domain.repository.PackageRepository
-import net.readian.parcel.feature.packages.mapper.DeliveryUiMapper
-import net.readian.parcel.feature.packages.model.DeliveryUiModel
+import net.readian.parcel.feature.packagedetail.PackageDetailContract.UiState
 import javax.inject.Inject
 
+@Suppress("MagicNumber")
 @HiltViewModel
 class PackageDetailViewModel @Inject constructor(
   repository: PackageRepository,
+  private val refreshManager: RefreshManager,
   savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -24,20 +28,45 @@ class PackageDetailViewModel @Inject constructor(
     packageId = requireNotNull(savedStateHandle.get<String>("packageId")),
   )
 
-  val uiState: StateFlow<UiState> = repository.getPackage(args.packageId)
-    .map { delivery ->
-      delivery?.let { UiState.Data(DeliveryUiMapper.toUiModel(it)) }
-        ?: UiState.NotFound
+  val uiState: StateFlow<UiState> = combine(
+    repository.getPackage(args.packageId),
+    refreshManager.refreshData,
+  ) { delivery, refreshData ->
+    when {
+      delivery != null -> UiState.Data(
+        delivery = DeliveryUiMapper.toUiModel(delivery),
+        refreshing = refreshData.refreshing,
+        canRefresh = refreshData.canRefresh,
+        cooldownMinutes = refreshData.cooldownMinutes,
+        lastRefreshError = refreshData.lastRefreshError,
+        hasOfflineData = refreshData.hasOfflineData,
+      )
+      else -> UiState.NotFound
     }
-    .stateIn(
-      scope = viewModelScope,
-      started = SharingStarted.WhileSubscribed(5000),
-      initialValue = UiState.Loading,
-    )
-}
+  }.stateIn(
+    scope = viewModelScope,
+    started = SharingStarted.WhileSubscribed(5000),
+    initialValue = UiState.Loading,
+  )
 
-sealed interface UiState {
-  data object Loading : UiState
-  data object NotFound : UiState
-  data class Data(val delivery: DeliveryUiModel) : UiState
+  init {
+    viewModelScope.launch {
+      refreshManager.syncCooldownFromRepo()
+    }
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    refreshManager.cleanup()
+  }
+
+  fun refreshPackage() {
+    viewModelScope.launch {
+      refreshManager.performRefresh()
+    }
+  }
+
+  fun onDismissError() {
+    refreshManager.resetErrorState()
+  }
 }

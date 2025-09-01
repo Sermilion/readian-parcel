@@ -16,6 +16,7 @@
     <string name="packages_title">My Packages</string>
     <string name="refresh">Refresh</string>
     <string name="search_hint">Search %1$s</string>
+    <string name="clear_search">Clear search</string>
     <string name="filter_all">All</string>
     <string name="no_packages_found">No packages found</string>
     <string name="carrier_label">Carrier: %1$s</string>
@@ -28,12 +29,17 @@
     <string name="error_api_key_empty">API key cannot be empty</string>
     <string name="error_invalid_api_key">Invalid API key</string>
     <string name="error_network_validation">Network error during validation</string>
+    <string name="refresh_error_offline_data">Refresh failed. Showing saved data.</string>
+    <string name="refresh_error_no_offline_data">Refresh failed. No saved data available.</string>
+    <string name="dismiss">Dismiss</string>
     <string name="events">Events</string>
     <string name="copy">Copy</string>
     <string name="share">Share</string>
     <string name="share_tracking_title">Share tracking</string>
     <string name="share_failed">Unable to share</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="separator_bullet"> • </string>
+    <string name="share_carrier_and_tracking">%1$s • %2$s</string>
     <string name="delivered_label">Delivered: %1$s</string>
     <string name="expected_label">Expected: %1$s</string>
     <string name="expected_window_label">Expected: %1$s — %2$s</string>
@@ -55,4 +61,9 @@
     <string name="delivery_status_failed_delivery">Delivery Failed</string>
     <string name="delivery_status_exception">Exception</string>
     <string name="delivery_status_carrier_informed">Carrier Notified</string>
+    
+    <!-- Rate limit dialog -->
+    <string name="rate_limit_dialog_title">Rate Limit Reached</string>
+    <string name="rate_limit_dialog_message">Please wait a moment before refreshing again. We limit refresh requests to prevent overloading the servers.</string>
+    <string name="rate_limit_dialog_message_with_time">Please wait ~%1$d min before refreshing again. We limit refresh requests to prevent overloading the servers.</string>
 </resources>

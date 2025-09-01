@@ -16,20 +16,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.flow.map
 import net.readian.parcel.core.designsystem.component.ReadianBackground
 import net.readian.parcel.core.designsystem.theme.StarterAppTheme
 import net.readian.parcel.core.ui.navigation.ParcelNavHost
 import net.readian.parcel.core.update.UpdateChecker
-import net.readian.parcel.data.datastore.ReadianUserDataStore
+import net.readian.parcel.domain.datastore.UserDataStore
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ParcelApp(
-  userDataStore: ReadianUserDataStore,
+  userDataStore: UserDataStore,
   modifier: Modifier = Modifier,
-  appState: StarterAppState = rememberStarterAppState(),
+  navController: NavHostController = rememberNavController(),
 ) {
   val isLoggedIn by userDataStore.userData.map {
     it.isLoggedIn
@@ -47,7 +49,7 @@ fun ParcelApp(
             .then(modifier),
         ) { innerPadding ->
           ParcelNavHost(
-            navController = appState.navController,
+            navController = navController,
             hasApiKey = isLoggedIn,
             modifier = Modifier
               .fillMaxSize()

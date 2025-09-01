@@ -9,6 +9,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import net.readian.parcel.BuildConfig
 import net.readian.parcel.core.common.di.qualifiers.ApiUrl
 import net.readian.parcel.core.common.di.qualifiers.Authenticated
 import net.readian.parcel.core.common.di.qualifiers.Unauthenticated
@@ -19,11 +20,14 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkingModule {
+
+  private const val TIMEOUT = 30L
 
   @Provides
   @Singleton
@@ -31,6 +35,11 @@ object NetworkingModule {
   fun unauthenticatedOkHttpClient(
     @ApplicationContext context: Context,
   ): OkHttpClient = OkHttpClient.Builder()
+    .retryOnConnectionFailure(true)
+    .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+    .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+    .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
+    .callTimeout(TIMEOUT, TimeUnit.SECONDS)
     .addInterceptor(ChuckerInterceptor.Builder(context).build())
     .build()
 
@@ -41,6 +50,11 @@ object NetworkingModule {
     @ApplicationContext context: Context,
     apiKeyInterceptor: ApiKeyInterceptor,
   ): OkHttpClient = OkHttpClient.Builder()
+    .retryOnConnectionFailure(true)
+    .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+    .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+    .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
+    .callTimeout(TIMEOUT, TimeUnit.SECONDS)
     .addInterceptor(apiKeyInterceptor)
     .addInterceptor(ChuckerInterceptor.Builder(context).build())
     .build()
@@ -74,8 +88,7 @@ object NetworkingModule {
   @Provides
   @Singleton
   @ApiUrl
-  @Suppress("FunctionOnlyReturningConstant")
-  fun provideParcelApiUrl(): String = "https://api.parcel.app/"
+  fun provideParcelApiUrl(): String = BuildConfig.API_BASE_URL
 
   @Provides
   @Singleton
