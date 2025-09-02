@@ -18,7 +18,7 @@ enum class ReadianFlavor(val dimension: FlavorDimension, val applicationIdSuffix
 }
 
 fun configureFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
     flavorConfigurationBlock: ProductFlavor.(flavor: ReadianFlavor) -> Unit = {}
 ) {
     commonExtension.apply {

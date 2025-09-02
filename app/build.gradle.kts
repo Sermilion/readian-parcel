@@ -4,6 +4,7 @@ plugins {
   alias(libs.plugins.protobuf)
   alias(libs.plugins.ksp)
   alias(libs.plugins.kotlin.serialization)
+  alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.readian.android.application)
   alias(libs.plugins.readian.android.application.compose)
   alias(libs.plugins.readian.android.application.flavors)
@@ -13,7 +14,7 @@ plugins {
 }
 
 val localProperties by lazy {
-  gradleLocalProperties(rootDir)
+  gradleLocalProperties(rootDir, providers)
 }
 
 android {
@@ -110,7 +111,6 @@ dependencies {
   implementation(libs.androidx.profileinstaller)
   implementation(libs.kotlinx.coroutines.guava)
   implementation(libs.coil.kt)
-  implementation(libs.accompanist.systemuicontroller)
 
   implementation(libs.compose.material.icons)
   implementation(libs.compose.constraintlayout)
@@ -120,8 +120,6 @@ dependencies {
   implementation(libs.okhttp)
   implementation(libs.retrofit)
   implementation(libs.retrofit.kotlin.serialization)
-
-  implementation(libs.play.update.compose)
 
   implementation(libs.timber)
 
@@ -139,14 +137,13 @@ dependencies {
   // WorkManager not used currently; removed to reduce footprint
 
   // Chucker for network debugging
-  debugImplementation("com.github.chuckerteam.chucker:library:4.0.0")
-  releaseImplementation("com.github.chuckerteam.chucker:library-no-op:4.0.0")
+  debugImplementation("com.github.chuckerteam.chucker:library:4.2.0")
+  releaseImplementation("com.github.chuckerteam.chucker:library-no-op:4.2.0")
 
   // Core functions
   testImplementation(libs.androidx.navigation.testing)
-  testImplementation(libs.accompanist.testharness)
   testImplementation(kotlin("test"))
   testImplementation(libs.kotlinx.coroutines.test)
-  testImplementation("io.mockk:mockk:1.13.10")
+  testImplementation(libs.mockk)
   // androidx.test:core not needed for pure JVM unit tests here
 }

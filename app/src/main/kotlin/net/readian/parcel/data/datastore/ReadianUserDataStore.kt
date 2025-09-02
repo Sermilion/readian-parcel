@@ -3,7 +3,7 @@ package net.readian.parcel.data.datastore
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
-import androidx.datastore.preferences.protobuf.InvalidProtocolBufferException
+import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.readian.parcel.data.proto.UserDataOuterClass.UserData

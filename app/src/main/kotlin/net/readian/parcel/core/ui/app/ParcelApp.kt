@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,12 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.flow.map
 import net.readian.parcel.core.designsystem.component.ReadianBackground
 import net.readian.parcel.core.designsystem.theme.StarterAppTheme
 import net.readian.parcel.core.ui.navigation.ParcelNavHost
-import net.readian.parcel.core.update.UpdateChecker
 import net.readian.parcel.domain.datastore.UserDataStore
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -39,29 +36,24 @@ fun ParcelApp(
 
   StarterAppTheme {
     ReadianBackground {
-      UpdateChecker {
-        val systemUiController = rememberSystemUiController()
-        systemUiController.setSystemBarsColor(MaterialTheme.colorScheme.background)
-
-        Scaffold(
+      Scaffold(
+        modifier = Modifier
+          .systemBarsPadding()
+          .then(modifier),
+      ) { innerPadding ->
+        ParcelNavHost(
+          navController = navController,
+          hasApiKey = isLoggedIn,
           modifier = Modifier
-            .systemBarsPadding()
-            .then(modifier),
-        ) { innerPadding ->
-          ParcelNavHost(
-            navController = navController,
-            hasApiKey = isLoggedIn,
-            modifier = Modifier
-              .fillMaxSize()
-              .padding(innerPadding)
-              .consumeWindowInsets(innerPadding)
-              .windowInsetsPadding(
-                WindowInsets.safeDrawing.only(
-                  WindowInsetsSides.Vertical,
-                ),
+            .fillMaxSize()
+            .padding(innerPadding)
+            .consumeWindowInsets(innerPadding)
+            .windowInsetsPadding(
+              WindowInsets.safeDrawing.only(
+                WindowInsetsSides.Vertical,
               ),
-          )
-        }
+            ),
+        )
       }
     }
   }

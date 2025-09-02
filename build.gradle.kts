@@ -1,4 +1,3 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   alias(libs.plugins.android.application) apply false
   alias(libs.plugins.kotlin.jvm) apply false
@@ -10,6 +9,7 @@ plugins {
   alias(libs.plugins.spotless)
   alias(libs.plugins.detekt)
   alias(libs.plugins.org.jetbrains.kotlin.android) apply false
+  id("com.github.ben-manes.versions") version "0.52.0"
 }
 
 buildscript {
@@ -39,7 +39,7 @@ subprojects {
   configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     kotlin {
       target("**/*.kt")
-      targetExclude("$buildDir/**/*.kt")
+      targetExclude("${layout.buildDirectory.get()}/**/*.kt")
       targetExclude("bin/**/*.kt")
       ktlint().editorConfigOverride(
         mapOf(
@@ -62,7 +62,7 @@ subprojects {
 
   apply(plugin = "io.gitlab.arturbosch.detekt")
   detekt {
-    config = files("$rootDir/detekt.yml")
+    config.setFrom(files("$rootDir/detekt.yml"))
     baseline = file("${rootProject.projectDir}/config/baseline.xml")
     buildUponDefaultConfig = true
   }
