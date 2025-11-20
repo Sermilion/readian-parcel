@@ -70,7 +70,7 @@ fun PackagesScreen(
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-  LaunchedEffect(Unit) {
+  LaunchedEffect(viewModel) {
     viewModel.uiFeedbackEvents.collect { event ->
       if (event is UiFeedbackEvent.NavigateToLogin) onLogout()
     }
@@ -128,10 +128,15 @@ fun PackagesScreen(
         onFilterChange = { filter = it },
       )
 
-      if (state is PackagesUiState.Content && state.lastRefreshError != null) {
+      val errorMessage = when (state) {
+        is PackagesUiState.Content -> state.lastRefreshError
+        is PackagesUiState.Empty -> state.lastRefreshError
+        else -> null
+      }
+      if (errorMessage != null) {
         ErrorBanner(
-          message = state.lastRefreshError,
-          hasOfflineData = state.hasOfflineData,
+          message = errorMessage,
+          hasOfflineData = (state as? PackagesUiState.Content)?.hasOfflineData ?: false,
           onDismiss = onDismissError,
         )
       }
@@ -146,9 +151,14 @@ fun PackagesScreen(
     }
 
     if (showRateLimitDialog) {
+      val cooldownMinutes = when (state) {
+        is PackagesUiState.Content -> state.cooldownMinutes
+        is PackagesUiState.Empty -> state.cooldownMinutes
+        else -> null
+      }
       RateLimitDialog(
         onDismiss = { showRateLimitDialog = false },
-        remainingMinutes = (state as? PackagesUiState.Content)?.cooldownMinutes,
+        remainingMinutes = cooldownMinutes,
       )
     }
   }
@@ -210,7 +220,12 @@ private fun ModernSearchBar(
         onSearch = { /* no-op */ },
         expanded = expanded,
         onExpandedChange = { /* locked closed */ },
-        leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+        leadingIcon = {
+          Icon(
+            Icons.Outlined.Search,
+            contentDescription = stringResource(id = R.string.search_icon_description),
+          )
+        },
         trailingIcon = {
           if (query.isNotEmpty()) {
             IconButton(onClick = { onQueryChange("") }) {
@@ -225,7 +240,7 @@ private fun ModernSearchBar(
         colors = inputFieldColors(
           focusedContainerColor = MaterialTheme.colorScheme.surface,
           unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-        )
+        ),
       )
     },
   ) { }
@@ -277,8 +292,14 @@ private fun PackagesListSection(
     when (state) {
       is PackagesUiState.Loading -> {
         CircularProgressIndicator(
-          modifier = Modifier.align(Alignment.Center).testTag("packages_loading"),
+          modifier = Modifier
+            .align(Alignment.Center)
+            .testTag("packages_loading"),
         )
+      }
+
+      is PackagesUiState.Empty -> {
+        EmptyPackagesContent(modifier = Modifier.align(Alignment.Center))
       }
 
       is PackagesUiState.Content -> {
@@ -299,21 +320,7 @@ private fun PackagesListSection(
         }
 
         if (filtered.isEmpty()) {
-          Column(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally,
-          ) {
-            Icon(
-              imageVector = Icons.Outlined.LocalShipping,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-              text = stringResource(id = R.string.no_packages_found),
-              style = MaterialTheme.typography.bodyLarge,
-            )
-          }
+          EmptyPackagesContent(modifier = Modifier.align(Alignment.Center))
         } else {
           LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -330,6 +337,25 @@ private fun PackagesListSection(
         }
       }
     }
+  }
+}
+
+@Composable
+private fun EmptyPackagesContent(modifier: Modifier = Modifier) {
+  Column(
+    modifier = modifier,
+    horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    Icon(
+      imageVector = Icons.Outlined.LocalShipping,
+      contentDescription = null,
+      tint = MaterialTheme.colorScheme.primary,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(
+      text = stringResource(id = R.string.no_packages_found),
+      style = MaterialTheme.typography.bodyLarge,
+    )
   }
 }
 

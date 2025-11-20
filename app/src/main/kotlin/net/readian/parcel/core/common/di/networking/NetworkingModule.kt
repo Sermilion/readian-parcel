@@ -2,7 +2,6 @@ package net.readian.parcel.core.common.di.networking
 
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerInterceptor
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,6 +19,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -92,8 +92,7 @@ object NetworkingModule {
 
   @Provides
   @Singleton
-  fun provideConverterFactory(json: Json): Converter.Factory =
-    json.asConverterFactory("application/json".toMediaType())
+  fun provideConverterFactory(json: Json): Converter.Factory = json.asConverterFactory("application/json".toMediaType())
 
   @Provides
   @Singleton

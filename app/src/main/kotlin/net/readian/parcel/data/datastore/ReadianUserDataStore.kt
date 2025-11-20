@@ -44,12 +44,10 @@ class ReadianUserDataStore @Inject constructor(
 object UserDataSerializer : Serializer<UserData> {
   override val defaultValue: UserData = UserData.getDefaultInstance()
 
-  override suspend fun readFrom(input: InputStream): UserData {
-    return try {
-      UserData.parseFrom(input)
-    } catch (exception: InvalidProtocolBufferException) {
-      throw CorruptionException("Cannot read proto.", exception)
-    }
+  override suspend fun readFrom(input: InputStream): UserData = try {
+    UserData.parseFrom(input)
+  } catch (exception: InvalidProtocolBufferException) {
+    throw CorruptionException("Cannot read proto.", exception)
   }
 
   override suspend fun writeTo(t: UserData, output: OutputStream) = t.writeTo(output)

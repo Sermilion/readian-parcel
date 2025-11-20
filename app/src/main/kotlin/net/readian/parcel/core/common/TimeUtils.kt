@@ -12,14 +12,12 @@ object TimeUtils {
     return zdt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
   }
 
-  fun formatRelativeTime(epochMillis: Long): String {
-    return DateUtils.getRelativeTimeSpanString(
-      epochMillis,
-      System.currentTimeMillis(),
-      DateUtils.MINUTE_IN_MILLIS,
-      DateUtils.FORMAT_ABBREV_RELATIVE,
-    ).toString()
-  }
+  fun formatRelativeTime(epochMillis: Long): String = DateUtils.getRelativeTimeSpanString(
+    epochMillis,
+    System.currentTimeMillis(),
+    DateUtils.MINUTE_IN_MILLIS,
+    DateUtils.FORMAT_ABBREV_RELATIVE,
+  ).toString()
 
   fun formattedAbsoluteAndRelative(epochMillis: Long): String {
     val absolute = formatTimestamp(epochMillis)

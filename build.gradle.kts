@@ -45,7 +45,8 @@ subprojects {
         mapOf(
           "indent_size" to "2",
           "ij_kotlin_allow_trailing_comma" to true,
-          "ij_kotlin_allow_trailing_comma_on_call_site" to true
+          "ij_kotlin_allow_trailing_comma_on_call_site" to true,
+          "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
         )
       )
     }

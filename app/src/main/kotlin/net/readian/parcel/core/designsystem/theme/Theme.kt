@@ -243,11 +243,9 @@ private fun getColorScheme(
 }
 
 @Composable
-private fun getDynamicColors(darkTheme: Boolean): ColorScheme {
-  return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    val context = LocalContext.current
-    if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-  } else {
-    if (darkTheme) DarkDefaultColorScheme else LightDefaultColorScheme
-  }
+private fun getDynamicColors(darkTheme: Boolean): ColorScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+  val context = LocalContext.current
+  if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+} else {
+  if (darkTheme) DarkDefaultColorScheme else LightDefaultColorScheme
 }

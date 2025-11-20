@@ -16,6 +16,7 @@ import net.readian.parcel.data.mapper.StatusMapper
 import net.readian.parcel.data.model.RateLimitInfoDataModel
 import net.readian.parcel.data.network.NetworkErrorUtils
 import net.readian.parcel.data.network.RateLimiter
+import net.readian.parcel.domain.model.ApiValidationResult
 import net.readian.parcel.domain.model.Delivery
 import net.readian.parcel.domain.model.RateLimitException
 import net.readian.parcel.domain.model.RateLimitInfo
@@ -37,17 +38,14 @@ class ReadianPackageRepository @Inject constructor(
   private val dispatcherProvider: DispatcherProvider,
 ) : PackageRepository {
 
-  override fun getAllPackages(): Flow<List<Delivery>> {
-    return packageDao.observeAllPackagesWithEvents().distinctUntilChanged().map { list ->
-      list.map { it.toDomain() }
-    }
-  }
+  override fun getAllPackages(): Flow<List<Delivery>> = packageDao.observeAllPackagesWithEvents()
+    .distinctUntilChanged()
+    .map { list -> list.map { it.toDomain() } }
 
-  override suspend fun savePackages(deliveries: List<Delivery>) =
-    withContext(dispatcherProvider.io()) {
-      val (entities, events) = convertDeliveriesToEntities(deliveries)
-      packageDao.savePackagesWithEvents(entities, events)
-    }
+  override suspend fun savePackages(deliveries: List<Delivery>) = withContext(dispatcherProvider.io()) {
+    val (entities, events) = convertDeliveriesToEntities(deliveries)
+    packageDao.savePackagesWithEvents(entities, events)
+  }
 
   override suspend fun getLastUpdateTime(): Long? = withContext(dispatcherProvider.io()) {
     packageDao.getLastUpdateTime()
@@ -116,69 +114,70 @@ class ReadianPackageRepository @Inject constructor(
     DeliveryMapper.toDomain(dataModel)
   }
 
-  override fun getPackage(trackingNumber: String): Flow<Delivery?> {
-    return packageDao.observePackageWithEvents(trackingNumber).map { entity ->
-      entity?.toDomain()
-    }
-  }
+  override fun getPackage(trackingNumber: String): Flow<Delivery?> = packageDao.observePackageWithEvents(trackingNumber)
+    .map { entity -> entity?.toDomain() }
 
-  override suspend fun validateAndSaveApiKey(apiKey: String): Boolean =
-    withContext(dispatcherProvider.io()) {
-      return@withContext try {
-        if (!rateLimiter.canMakeRequest()) {
-          val timeUntilNext = rateLimiter.getTimeUntilNextRequest()
-          val remaining = rateLimiter.getRemainingRequests()
-          throw RateLimitException(timeUntilNext, remaining)
-        }
+  override suspend fun validateAndSaveApiKey(apiKey: String): ApiValidationResult = withContext(dispatcherProvider.io()) {
+    return@withContext try {
+      if (!rateLimiter.canMakeRequest()) {
+        val timeUntilNext = rateLimiter.getTimeUntilNextRequest()
+        val remaining = rateLimiter.getRemainingRequests()
+        val exception = RateLimitException(timeUntilNext, remaining)
+        return@withContext ApiValidationResult.RateLimited(exception)
+      }
 
-        apiKeyRepository.setApiKey(apiKey)
+      apiKeyRepository.setApiKey(apiKey)
 
-        val response = parcelApiService.getDeliveries()
-        rateLimiter.recordRequest()
-        val ok = response.isSuccessful && response.body()?.success == true
-        if (!ok) {
-          if (!response.isSuccessful) {
+      val response = parcelApiService.getDeliveries()
+      rateLimiter.recordRequest()
+      val ok = response.isSuccessful && response.body()?.success == true
+      if (ok) {
+        ApiValidationResult.Success
+      } else {
+        if (!response.isSuccessful) {
+          try {
             NetworkErrorUtils.throwRateLimitIfApplicable(
               response = response,
               rateLimiter = rateLimiter,
               json = json,
             )
+          } catch (e: RateLimitException) {
+            return@withContext ApiValidationResult.RateLimited(e)
           }
-          apiKeyRepository.clearApiKey()
         }
-        ok
-      } catch (e: RateLimitException) {
-        throw e
-      } catch (e: IOException) {
-        Timber.e(e, "Network error validating API key")
         apiKeyRepository.clearApiKey()
-        false
-      } catch (e: HttpException) {
-        Timber.e(e, "HTTP error validating API key")
-        apiKeyRepository.clearApiKey()
-        false
+        ApiValidationResult.InvalidKey
       }
+    } catch (e: RateLimitException) {
+      ApiValidationResult.RateLimited(e)
+    } catch (e: IOException) {
+      Timber.e(e, "Network error validating API key")
+      apiKeyRepository.clearApiKey()
+      ApiValidationResult.NetworkError
+    } catch (e: HttpException) {
+      Timber.e(e, "HTTP error validating API key")
+      apiKeyRepository.clearApiKey()
+      ApiValidationResult.NetworkError
     }
+  }
 
   override suspend fun clearSavedApiKey() {
     apiKeyRepository.clearApiKey()
   }
 
-  private fun Delivery.toEntity(): PackageDataModel {
-    return PackageDataModel(
-      trackingNumber = trackingNumber,
-      carrierCode = carrierCode,
-      description = description,
-      statusCode = StatusMapper.toData(status),
-      lastUpdated = System.currentTimeMillis(),
-      extraInformation = extraInformation,
-      expectedAt = expectedAt,
-      expectedEndAt = expectedEndAt,
-      expectedDateRaw = expectedDateRaw,
-      expectedEndDateRaw = expectedEndDateRaw,
-      lastNotifiedStatus = null, // Will be set when notification is sent
-    )
-  }
+  private fun Delivery.toEntity(): PackageDataModel = PackageDataModel(
+    trackingNumber = trackingNumber,
+    carrierCode = carrierCode,
+    description = description,
+    statusCode = StatusMapper.toData(status),
+    lastUpdated = System.currentTimeMillis(),
+    extraInformation = extraInformation,
+    expectedAt = expectedAt,
+    expectedEndAt = expectedEndAt,
+    expectedDateRaw = expectedDateRaw,
+    expectedEndDateRaw = expectedEndDateRaw,
+    lastNotifiedStatus = null, // Will be set when notification is sent
+  )
 
   private fun convertDeliveriesToEntities(
     deliveries: List<Delivery>,
@@ -200,25 +199,23 @@ class ReadianPackageRepository @Inject constructor(
     return Pair(entities, events)
   }
 
-  private fun PackageWithEvents.toDomain(): Delivery {
-    return Delivery(
-      trackingNumber = pkg.trackingNumber,
-      carrierCode = pkg.carrierCode,
-      description = pkg.description,
-      status = StatusMapper.toDomain(pkg.statusCode),
-      events = events.map { event ->
-        net.readian.parcel.domain.model.DeliveryEvent(
-          timestamp = event.timestamp,
-          description = event.description,
-          location = event.location,
-          rawDate = event.rawDate,
-        )
-      },
-      extraInformation = pkg.extraInformation,
-      expectedAt = pkg.expectedAt,
-      expectedEndAt = pkg.expectedEndAt,
-      expectedDateRaw = pkg.expectedDateRaw,
-      expectedEndDateRaw = pkg.expectedEndDateRaw,
-    )
-  }
+  private fun PackageWithEvents.toDomain(): Delivery = Delivery(
+    trackingNumber = pkg.trackingNumber,
+    carrierCode = pkg.carrierCode,
+    description = pkg.description,
+    status = StatusMapper.toDomain(pkg.statusCode),
+    events = events.map { event ->
+      net.readian.parcel.domain.model.DeliveryEvent(
+        timestamp = event.timestamp,
+        description = event.description,
+        location = event.location,
+        rawDate = event.rawDate,
+      )
+    },
+    extraInformation = pkg.extraInformation,
+    expectedAt = pkg.expectedAt,
+    expectedEndAt = pkg.expectedEndAt,
+    expectedDateRaw = pkg.expectedDateRaw,
+    expectedEndDateRaw = pkg.expectedEndDateRaw,
+  )
 }

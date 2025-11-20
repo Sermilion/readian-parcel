@@ -5,8 +5,14 @@ import net.readian.parcel.feature.packages.PackagesContract.PackagesUiState
 
 object PackagesContract {
 
-  sealed class PackagesUiState {
-    data object Loading : PackagesUiState()
+  sealed interface PackagesUiState {
+    data object Loading : PackagesUiState
+
+    data class Empty(
+      val canRefresh: Boolean = true,
+      val cooldownMinutes: Int? = null,
+      val lastRefreshError: String? = null,
+    ) : PackagesUiState
 
     data class Content(
       val packages: List<DeliveryUiModel> = emptyList(),
@@ -15,7 +21,7 @@ object PackagesContract {
       val cooldownMinutes: Int? = null,
       val lastRefreshError: String? = null,
       val hasOfflineData: Boolean = false,
-    ) : PackagesUiState()
+    ) : PackagesUiState
   }
 
   sealed interface UiFeedbackEvent {
@@ -23,16 +29,14 @@ object PackagesContract {
   }
 }
 
-val PackagesUiState.refreshAllowed: Boolean get() {
-  return when (this) {
-    is PackagesUiState.Loading -> false
-    is PackagesUiState.Content -> this.canRefresh && !this.refreshing
-  }
+val PackagesUiState.refreshAllowed: Boolean get() = when (this) {
+  is PackagesUiState.Loading -> false
+  is PackagesUiState.Empty -> this.canRefresh
+  is PackagesUiState.Content -> this.canRefresh && !this.refreshing
 }
 
-val PackagesUiState.isRefreshing: Boolean get() {
-  return when (this) {
-    is PackagesUiState.Loading -> false
-    is PackagesUiState.Content -> this.refreshing
-  }
+val PackagesUiState.isRefreshing: Boolean get() = when (this) {
+  is PackagesUiState.Loading -> false
+  is PackagesUiState.Empty -> false
+  is PackagesUiState.Content -> this.refreshing
 }

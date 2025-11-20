@@ -72,14 +72,15 @@ fun LoginContent(
 ) {
   val snackBarHostState = androidx.compose.runtime.remember { SnackbarHostState() }
 
-  val errorMessage: String? = when (state.error) {
+  val errorMessage: String = when (state.error) {
     LoginError.EmptyKey -> stringResource(id = R.string.error_api_key_empty)
     LoginError.InvalidKey -> stringResource(id = R.string.error_invalid_api_key)
     LoginError.Network -> stringResource(id = R.string.error_network_validation)
-    null -> null
+    LoginError.RateLimited -> stringResource(id = R.string.error_rate_limited)
+    null -> ""
   }
 
-  if (state.isError && errorMessage != null) {
+  if (state.isError && errorMessage.isNotBlank()) {
     LaunchedEffect(errorMessage) { snackBarHostState.showSnackbar(errorMessage) }
   }
 
@@ -96,7 +97,7 @@ fun LoginContent(
     ) {
       Icon(
         imageVector = Icons.Outlined.Inventory,
-        contentDescription = null,
+        contentDescription = stringResource(id = R.string.app_name),
         tint = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(64.dp),
       )

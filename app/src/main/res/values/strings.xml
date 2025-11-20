@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Parcel Tracker</string>
+    <string name="app_name">Parcel App</string>
     
     <!-- Bottom navigation -->
     <string name="packages">Packages</string>
@@ -29,9 +29,12 @@
     <string name="error_api_key_empty">API key cannot be empty</string>
     <string name="error_invalid_api_key">Invalid API key</string>
     <string name="error_network_validation">Network error during validation</string>
+    <string name="error_rate_limited">Rate limit exceeded. Please try again later.</string>
     <string name="refresh_error_offline_data">Refresh failed. Showing saved data.</string>
     <string name="refresh_error_no_offline_data">Refresh failed. No saved data available.</string>
     <string name="dismiss">Dismiss</string>
+    <string name="error_icon_description">Error</string>
+    <string name="search_icon_description">Search</string>
     <string name="events">Events</string>
     <string name="copy">Copy</string>
     <string name="share">Share</string>

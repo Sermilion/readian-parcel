@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
@@ -96,14 +95,13 @@ fun PackageDetailScreen(
 private fun PackageDetailContent(
   state: UiState,
   actions: PackageDetailActions,
+  snackBarHostState: SnackbarHostState,
   modifier: Modifier = Modifier,
-  snackBarHostState: SnackbarHostState? = null,
 ) {
-  val host = snackBarHostState ?: remember { SnackbarHostState() }
   var showRateLimitDialog by remember { mutableStateOf(false) }
 
   Scaffold(
-    snackbarHost = { SnackbarHost(hostState = host) },
+    snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
     modifier = modifier,
     topBar = {
       CenterAlignedTopAppBar(
@@ -284,7 +282,7 @@ private fun EventsSection(delivery: DeliveryUiModel) {
       style = MaterialTheme.typography.titleMedium,
       modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     )
-    val sorted = androidx.compose.runtime.remember(delivery.events) {
+    val sorted = remember(delivery.events) {
       delivery.events.sortedByDescending { it.timestamp ?: Long.MIN_VALUE }
     }
     LazyColumn(
@@ -294,11 +292,11 @@ private fun EventsSection(delivery: DeliveryUiModel) {
     ) {
       itemsIndexed(
         items = sorted,
-        key = { index, event ->
+        key = { _, event ->
           "${event.timestamp ?: -1}" +
             "_${event.description}" +
-            "_${event.location ?: ""}" +
-            "_${event.rawDate ?: ""}_$index"
+            "_${event.location.orEmpty()}" +
+            "_${event.rawDate.orEmpty()}"
         },
       ) { _, event ->
         EventRow(event)
@@ -321,7 +319,7 @@ private fun EventRow(event: DeliveryEventUiModel) {
         style = MaterialTheme.typography.bodyLarge,
       )
       val timeText = event.timestamp?.let { TimeUtils.formattedAbsoluteAndRelative(it) }
-        ?: (event.rawDate ?: "")
+        ?: event.rawDate.orEmpty()
       Text(
         text = timeText,
         style = MaterialTheme.typography.bodySmall,

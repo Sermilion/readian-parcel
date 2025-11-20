@@ -18,20 +18,18 @@ import javax.inject.Singleton
 @Singleton
 class RefreshManager @Inject constructor(
   private val packageRepository: PackageRepository,
-  @ApplicationScope val scope: CoroutineScope,
+  @param:ApplicationScope val scope: CoroutineScope,
 ) {
   private val refreshCooldownMs = 3 * 60 * 1000L
   private var cooldownJob: Job? = null
 
   private val _refreshState = MutableStateFlow(RefreshState())
-  val refreshData = _refreshState.asStateFlow()
+  val refreshState = _refreshState.asStateFlow()
 
   suspend fun performRefresh() {
     try {
       _refreshState.update { it.copy(refreshing = true, lastRefreshError = null) }
-      val result = packageRepository.refreshPackages()
-
-      when (result) {
+      when (val result = packageRepository.refreshPackages()) {
         is RefreshResult.Success -> {
           startCooldownTimer(refreshCooldownMs)
           _refreshState.update { it.copy(hasOfflineData = false) }
@@ -104,7 +102,5 @@ class RefreshManager @Inject constructor(
     _refreshState.value = RefreshState()
   }
 
-  private fun Int?.toMinutes(): Int? {
-    return this?.let { seconds -> (seconds + 59) / 60 }
-  }
+  private fun Int?.toMinutes(): Int? = this?.let { seconds -> (seconds + 59) / 60 }
 }

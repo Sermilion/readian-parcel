@@ -3,53 +3,51 @@ package net.readian.parcel.data.network
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.engine.spec.tempdir
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import java.io.File
 
-@OptIn(ExperimentalCoroutinesApi::class)
-class RateLimiterTest {
+class RateLimiterTest :
+  FunSpec({
+    val tempDir = tempdir()
 
-  @get:Rule
-  val tmp = TemporaryFolder()
-
-  private fun newDataStore(): DataStore<Preferences> =
-    PreferenceDataStoreFactory.create(
-      produceFile = { tmp.newFile("rate_limiter.preferences_pb") },
+    fun newDataStore(): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+      produceFile = { File(tempDir, "rate_limiter_${System.nanoTime()}.preferences_pb") },
     )
 
-  @Test
-  fun initial_state_allows_requests() = runTest {
-    val dataStore = newDataStore()
-    val limiter = RateLimiter(dataStore)
+    test("initial state allows requests") {
+      runTest {
+        val dataStore = newDataStore()
+        val limiter = RateLimiter(dataStore)
 
-    assertTrue(limiter.canMakeRequest())
-    assertEquals(20, limiter.getRemainingRequests())
-  }
+        limiter.canMakeRequest() shouldBe true
+        limiter.getRemainingRequests() shouldBe 20
+      }
+    }
 
-  @Test
-  fun records_and_blocks_after_limit() = runTest {
-    val dataStore = newDataStore()
-    val limiter = RateLimiter(dataStore)
+    test("records and blocks after limit") {
+      runTest {
+        val dataStore = newDataStore()
+        val limiter = RateLimiter(dataStore)
 
-    repeat(20) { limiter.recordRequest() }
+        repeat(20) { limiter.recordRequest() }
 
-    assertEquals(0, limiter.getRemainingRequests())
-    assertTrue(limiter.getTimeUntilNextRequest() > 0)
-    assertEquals(false, limiter.canMakeRequest())
-  }
+        limiter.getRemainingRequests() shouldBe 0
+        (limiter.getTimeUntilNextRequest() > 0) shouldBe true
+        limiter.canMakeRequest() shouldBe false
+      }
+    }
 
-  @Test
-  fun persists_state_across_instances() = runTest {
-    val dataStore = newDataStore()
-    val limiter1 = RateLimiter(dataStore)
-    repeat(5) { limiter1.recordRequest() }
+    test("persists state across instances") {
+      runTest {
+        val dataStore = newDataStore()
+        val limiter1 = RateLimiter(dataStore)
+        repeat(5) { limiter1.recordRequest() }
 
-    val limiter2 = RateLimiter(dataStore)
-    assertEquals(15, limiter2.getRemainingRequests())
-  }
-}
+        val limiter2 = RateLimiter(dataStore)
+        limiter2.getRemainingRequests() shouldBe 15
+      }
+    }
+  })

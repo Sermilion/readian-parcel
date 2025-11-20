@@ -1,6 +1,7 @@
 package net.readian.parcel.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import net.readian.parcel.domain.model.ApiValidationResult
 import net.readian.parcel.domain.model.Delivery
 import net.readian.parcel.domain.model.RateLimitInfo
 import net.readian.parcel.domain.model.RefreshResult
@@ -17,9 +18,9 @@ interface PackageRepository {
 
   suspend fun getRateLimitInfo(): RateLimitInfo
 
-  suspend fun validateAndSaveApiKey(apiKey: String): Boolean
+  suspend fun validateAndSaveApiKey(apiKey: String): ApiValidationResult
 
   suspend fun clearSavedApiKey()
 
-  fun getPackage(trackingNumber: String): kotlinx.coroutines.flow.Flow<Delivery?>
+  fun getPackage(trackingNumber: String): Flow<Delivery?>
 }

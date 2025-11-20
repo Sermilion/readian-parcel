@@ -10,18 +10,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import net.readian.parcel.domain.datastore.UserDataStore
-import net.readian.parcel.domain.repository.PackageRepository
+import net.readian.parcel.domain.model.ApiValidationResult
+import net.readian.parcel.domain.usecase.ValidateAndLoginUseCase
 import net.readian.parcel.feature.login.LoginContract.LoginError
 import net.readian.parcel.feature.login.LoginContract.UiEvent
 import net.readian.parcel.feature.login.LoginContract.UiState
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-  private val userDataStore: UserDataStore,
-  private val packageRepository: PackageRepository,
+  private val validateAndLoginUseCase: ValidateAndLoginUseCase,
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(UiState())
@@ -53,14 +51,10 @@ class LoginViewModel @Inject constructor(
 
     viewModelScope.launch {
       _uiState.update { it.copy(isLoading = true) }
-      runCatching {
-        packageRepository.validateAndSaveApiKey(_uiState.value.apiKey)
-      }.onSuccess { isValid ->
-        if (isValid) {
-          userDataStore.setLoggedIn(true)
-          _uiEvents.trySend(UiEvent.NavigateToPackages)
-        } else {
-          userDataStore.logout()
+      when (validateAndLoginUseCase(_uiState.value.apiKey)) {
+        is ApiValidationResult.Success -> _uiEvents.trySend(UiEvent.NavigateToPackages)
+
+        is ApiValidationResult.InvalidKey -> {
           _uiState.update {
             it.copy(
               isLoading = false,
@@ -69,16 +63,24 @@ class LoginViewModel @Inject constructor(
             )
           }
         }
-      }.onFailure { e ->
-        userDataStore.logout()
-        _uiState.update {
-          it.copy(
-            isLoading = false,
-            isError = true,
-            error = LoginError.Network,
-          )
+        is ApiValidationResult.RateLimited -> {
+          _uiState.update {
+            it.copy(
+              isLoading = false,
+              isError = true,
+              error = LoginError.RateLimited,
+            )
+          }
         }
-        Timber.e(e, "Error validating API key")
+        is ApiValidationResult.NetworkError -> {
+          _uiState.update {
+            it.copy(
+              isLoading = false,
+              isError = true,
+              error = LoginError.Network,
+            )
+          }
+        }
       }
     }
   }

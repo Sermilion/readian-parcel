@@ -35,14 +35,10 @@ object DatabaseModule {
   }
 
   @Provides
-  fun providePackageDao(database: ParcelDatabase): PackageDao {
-    return database.packageDao()
-  }
+  fun providePackageDao(database: ParcelDatabase): PackageDao = database.packageDao()
 
   @Provides
-  fun provideCarrierDao(database: ParcelDatabase): CarrierDao {
-    return database.carrierDao()
-  }
+  fun provideCarrierDao(database: ParcelDatabase): CarrierDao = database.carrierDao()
 
   @Provides
   @Singleton

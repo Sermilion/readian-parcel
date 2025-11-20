@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -30,8 +31,8 @@ fun ParcelApp(
   modifier: Modifier = Modifier,
   navController: NavHostController = rememberNavController(),
 ) {
-  val isLoggedIn by userDataStore.userData.map {
-    it.isLoggedIn
+  val isLoggedIn by remember {
+    userDataStore.userData.map { it.isLoggedIn }
   }.collectAsStateWithLifecycle(initialValue = false)
 
   StarterAppTheme {

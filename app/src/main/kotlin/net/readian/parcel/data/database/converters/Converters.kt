@@ -5,12 +5,8 @@ import net.readian.parcel.data.database.entity.DeliveryStatusDataModel
 
 class Converters {
   @TypeConverter
-  fun fromDeliveryStatus(status: DeliveryStatusDataModel): Int {
-    return status.ordinal
-  }
+  fun fromDeliveryStatus(status: DeliveryStatusDataModel): Int = status.ordinal
 
   @TypeConverter
-  fun toDeliveryStatus(statusCode: Int): DeliveryStatusDataModel {
-    return DeliveryStatusDataModel.entries[statusCode]
-  }
+  fun toDeliveryStatus(statusCode: Int): DeliveryStatusDataModel = DeliveryStatusDataModel.entries[statusCode]
 }

@@ -1,5 +1,6 @@
 package net.readian.parcel.data.network
 
+import kotlinx.coroutines.runBlocking
 import net.readian.parcel.data.repository.ApiKeyRepository
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -15,7 +16,7 @@ class ApiKeyInterceptor @Inject constructor(
   override fun intercept(chain: Interceptor.Chain): Response {
     val request = chain.request()
 
-    val apiKeyRaw = apiKeyRepository.getApiKey()
+    val apiKeyRaw = runBlocking { apiKeyRepository.getApiKey() }
     val apiKey = apiKeyRaw
       ?.filter { it.code in 32..126 }
       ?.trim()

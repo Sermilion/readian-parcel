@@ -64,6 +64,9 @@ android {
   testOptions {
     unitTests {
       isIncludeAndroidResources = true
+      all {
+        it.useJUnitPlatform()
+      }
     }
   }
 }
@@ -129,7 +132,7 @@ dependencies {
   implementation(libs.protobuf.kotlin.lite)
 
   // Security
-  implementation(libs.androidx.security.crypto)
+  implementation(libs.tink.android)
 
   // JSON serialization
   implementation(libs.kotlinx.serialization.json)
@@ -145,5 +148,16 @@ dependencies {
   testImplementation(kotlin("test"))
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.mockk)
-  // androidx.test:core not needed for pure JVM unit tests here
+
+  // Kotest
+  testImplementation(libs.kotest.runner.junit5)
+  testImplementation(libs.kotest.assertions.core)
+  testImplementation(libs.kotest.property)
+
+  // Turbine for Flow testing
+  testImplementation(libs.turbine)
+
+  // Robolectric for Android unit tests
+  testImplementation(libs.robolectric)
+  testImplementation("androidx.test:core:1.6.1")
 }

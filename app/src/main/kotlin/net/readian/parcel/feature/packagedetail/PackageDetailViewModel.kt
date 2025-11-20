@@ -30,16 +30,16 @@ class PackageDetailViewModel @Inject constructor(
 
   val uiState: StateFlow<UiState> = combine(
     repository.getPackage(args.packageId),
-    refreshManager.refreshData,
-  ) { delivery, refreshData ->
+    refreshManager.refreshState,
+  ) { delivery, refreshState ->
     when {
       delivery != null -> UiState.Data(
         delivery = DeliveryUiMapper.toUiModel(delivery),
-        refreshing = refreshData.refreshing,
-        canRefresh = refreshData.canRefresh,
-        cooldownMinutes = refreshData.cooldownMinutes,
-        lastRefreshError = refreshData.lastRefreshError,
-        hasOfflineData = refreshData.hasOfflineData,
+        refreshing = refreshState.refreshing,
+        canRefresh = refreshState.canRefresh,
+        cooldownMinutes = refreshState.cooldownMinutes,
+        lastRefreshError = refreshState.lastRefreshError,
+        hasOfflineData = refreshState.hasOfflineData,
       )
       else -> UiState.NotFound
     }

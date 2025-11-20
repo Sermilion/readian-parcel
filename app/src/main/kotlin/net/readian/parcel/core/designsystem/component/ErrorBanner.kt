@@ -51,7 +51,7 @@ fun ErrorBanner(
       ) {
         Icon(
           imageVector = Icons.Outlined.Warning,
-          contentDescription = null,
+          contentDescription = stringResource(id = R.string.error_icon_description),
           tint = MaterialTheme.colorScheme.onErrorContainer,
         )
         Spacer(modifier = Modifier.padding(4.dp))

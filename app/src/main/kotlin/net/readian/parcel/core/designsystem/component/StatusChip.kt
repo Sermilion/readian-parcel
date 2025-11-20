@@ -27,7 +27,7 @@ fun DeliveryStatusChip(
     label = { Text(text = stringResource(id = textRes)) },
     leadingIcon = {
       val icon = statusIconFor(statusColor)
-      Icon(imageVector = icon, contentDescription = null)
+      Icon(imageVector = icon, contentDescription = stringResource(id = textRes))
     },
     colors = AssistChipDefaults.assistChipColors(
       containerColor = MaterialTheme.colorScheme.surface,

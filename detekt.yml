@@ -7,6 +7,8 @@ naming:
     active: false
 
 style:
+  MaxLineLength:
+    maxLineLength: 150
   MagicNumber:
     ignorePropertyDeclaration: true
   UnusedPrivateMember:

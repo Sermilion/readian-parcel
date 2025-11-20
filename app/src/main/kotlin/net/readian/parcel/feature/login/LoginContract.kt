@@ -13,6 +13,7 @@ object LoginContract {
     data object EmptyKey : LoginError
     data object InvalidKey : LoginError
     data object Network : LoginError
+    data object RateLimited : LoginError
   }
 
   sealed interface UiEvent {

@@ -8,6 +8,10 @@ import net.readian.parcel.domain.model.Delivery
 import net.readian.parcel.domain.model.DeliveryEvent
 import net.readian.parcel.domain.model.DeliveryStatus
 import net.readian.parcel.domain.model.RateLimitInfo
+import timber.log.Timber
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * Maps data layer models to domain layer models
@@ -15,62 +19,59 @@ import net.readian.parcel.domain.model.RateLimitInfo
  */
 object DeliveryMapper {
 
-  fun toDomain(dataModel: DeliveryResponse): Delivery {
-    return Delivery(
-      trackingNumber = dataModel.trackingNumber,
-      carrierCode = dataModel.carrierCode,
-      description = dataModel.description,
-      status = dataModel.statusCode.toDeliveryStatus(),
-      events = dataModel.events.map { toDomain(it) },
-      extraInformation = dataModel.extraInformation,
-      expectedAt = dataModel.timestampExpected
-        ?: dataModel.dateExpected?.let { parseDateToTimestampOrNull(it) },
-      expectedEndAt = dataModel.timestampExpectedEnd
-        ?: dataModel.dateExpectedEnd?.let { parseDateToTimestampOrNull(it) },
-      expectedDateRaw = dataModel.dateExpected,
-      expectedEndDateRaw = dataModel.dateExpectedEnd,
-    )
-  }
+  fun toDomain(dataModel: DeliveryResponse): Delivery = Delivery(
+    trackingNumber = dataModel.trackingNumber,
+    carrierCode = dataModel.carrierCode,
+    description = dataModel.description,
+    status = dataModel.statusCode.toDeliveryStatus(),
+    events = dataModel.events.map { toDomain(it) },
+    extraInformation = dataModel.extraInformation,
+    expectedAt = dataModel.timestampExpected
+      ?: dataModel.dateExpected?.let { parseDateToTimestampOrNull(it) },
+    expectedEndAt = dataModel.timestampExpectedEnd
+      ?: dataModel.dateExpectedEnd?.let { parseDateToTimestampOrNull(it) },
+    expectedDateRaw = dataModel.dateExpected,
+    expectedEndDateRaw = dataModel.dateExpectedEnd,
+  )
 
-  fun toDomain(dataModel: DeliveryEventResponse): DeliveryEvent {
-    return DeliveryEvent(
-      timestamp = parseDateToTimestampOrNull(dataModel.date),
-      description = dataModel.event,
-      location = dataModel.location,
-      rawDate = dataModel.date,
-    )
-  }
+  fun toDomain(dataModel: DeliveryEventResponse): DeliveryEvent = DeliveryEvent(
+    timestamp = parseDateToTimestampOrNull(dataModel.date),
+    description = dataModel.event,
+    location = dataModel.location,
+    rawDate = dataModel.date,
+  )
 
+  @Suppress("TooGenericExceptionCaught")
   fun parseDateToTimestampOrNull(dateString: String): Long? {
     return runCatching {
-      java.time.Instant.parse(dateString).toEpochMilli()
+      Instant.parse(dateString).toEpochMilli()
     }.recoverCatching {
-      java.time.OffsetDateTime.parse(dateString).toInstant().toEpochMilli()
+      OffsetDateTime.parse(dateString).toInstant().toEpochMilli()
     }.recoverCatching {
       val formatters = listOf(
-        java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME,
-        java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME,
-        java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-        java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
-        java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
+        DateTimeFormatter.ISO_ZONED_DATE_TIME,
+        DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+        DateTimeFormatter.ofPattern(TIME_FORMAT),
+        DateTimeFormatter.ofPattern(TIME_FORMAT),
       )
       for (f in formatters) {
         try {
           val ldt = java.time.LocalDateTime.parse(dateString, f)
           return@recoverCatching ldt.atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
-        } catch (_: Exception) { }
+        } catch (e: Exception) {
+          Timber.v(e, "Date format %s did not match: %s", f, dateString)
+        }
       }
       // Epoch millis as string
       dateString.toLongOrNull()
     }.getOrNull()
   }
 
-  fun toDomain(dataModel: RateLimitInfoDataModel): RateLimitInfo {
-    return RateLimitInfo(
-      remainingRequests = dataModel.remainingRequests,
-      timeUntilNextRequestMs = dataModel.timeUntilNextRequestMs,
-    )
-  }
+  fun toDomain(dataModel: RateLimitInfoDataModel): RateLimitInfo = RateLimitInfo(
+    remainingRequests = dataModel.remainingRequests,
+    timeUntilNextRequestMs = dataModel.timeUntilNextRequestMs,
+  )
 
   private fun Int.toDeliveryStatus(): DeliveryStatus {
     val dataStatus = DeliveryStatusResponse.fromCode(this)
@@ -86,4 +87,6 @@ object DeliveryMapper {
       DeliveryStatusResponse.CARRIER_INFORMED -> DeliveryStatus.CARRIER_INFORMED
     }
   }
+
+  private const val TIME_FORMAT = "yyyy-MM-dd HH:mm:ss"
 }

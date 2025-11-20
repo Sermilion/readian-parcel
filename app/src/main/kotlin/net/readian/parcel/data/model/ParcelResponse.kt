@@ -63,7 +63,6 @@ enum class DeliveryStatusResponse(val code: Int) {
   ;
 
   companion object Companion {
-    fun fromCode(code: Int): DeliveryStatusResponse =
-      DeliveryStatusResponse.entries.find { it.code == code } ?: EXCEPTION
+    fun fromCode(code: Int): DeliveryStatusResponse = DeliveryStatusResponse.entries.find { it.code == code } ?: EXCEPTION
   }
 }
